@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Vapi Multi-Agent Tester</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            text-align: center;
+            background: #f0f4f8;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 16px;
+            background: white;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 12px;
+            border: none;
+            transition: all 0.3s;
+            margin: 10px;
+            width: 100%;
+        }
+
+        #startBtn {
+            background: #6366f1;
+            color: white;
+        }
+
+        #startBtn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        #startBtn:hover:not(:disabled) {
+            background: #4f46e5;
+        }
+
+        #stopBtn {
+            background: #f43f5e;
+            color: white;
+            display: none;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .log-container {
+            margin-top: 20px;
+            text-align: left;
+            background: #1e293b;
+            color: #38bdf8;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+
+        .transcript {
+            color: #f8fafc;
+            margin-top: 5px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 5px;
+        }
+
+        .agent-info {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+    </style>
+
+    <!-- Using local browser-ready bundle -->
+    <script src="/vapi-bundle.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Vapi Direct AI Tester</h2>
+        <p class="agent-info">Test specific agents from your database</p>
+
+        <select id="agentSelect">
+            <option value="">-- Loading Agents --</option>
+        </select>
+
+        <button id="startBtn" disabled>Select an Agent to Start</button>
+        <button id="stopBtn">End Conversation</button>
+
+        <div id="status">Status: Ready</div>
+
+        <div class="log-container" id="logs">
+            <div>--- Waiting for connection ---</div>
+        </div>
+    </div>
+
+    <script>
+        let vapiInstance = null;
+        let config = null;
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const agentSelect = document.getElementById('agentSelect');
+        const statusText = document.getElementById('status');
+        const logs = document.getElementById('logs');
+
+        function addLog(msg, isTranscript = false) {
+            const div = document.createElement('div');
+            if (isTranscript) div.className = 'transcript';
+            div.innerText = msg;
+            logs.appendChild(div);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        async function loadConfig() {
+            try {
+                const res = await fetch('/config');
+                config = await res.json();
+                addLog("✅ Configuration loaded");
+            } catch (e) {
+                addLog("❌ Failed to load config");
+            }
+        }
+
+        async function loadAgents() {
+            try {
+                const res = await fetch('/api/agents');
+                const data = await res.json();
+
+                agentSelect.innerHTML = '<option value="">-- Select an Agent --</option>';
+                data.agents.forEach(agent => {
+                    const opt = document.createElement('option');
+                    opt.value = agent.id;
+                    opt.innerText = `${agent.name} (${agent.phoneNumber || 'No Number'})`;
+                    agentSelect.appendChild(opt);
+                });
+
+                agentSelect.onchange = () => {
+                    startBtn.disabled = !agentSelect.value;
+                    startBtn.innerText = agentSelect.value ? "Start AI Call" : "Select an Agent to Start";
+                };
+            } catch (e) {
+                console.error(e);
+                agentSelect.innerHTML = '<option value="">Error loading agents</option>';
+            }
+        }
+
+        async function initVapi() {
+            if (!config) await loadConfig();
+
+            // --- Resilient Class Detection ---
+            let VapiSDK = window.Vapi;
+
+            if (typeof VapiSDK !== 'function') {
+                console.log("Vapi check:", VapiSDK);
+                throw new Error("Vapi SDK not found. Refreshing might help.");
+            }
+
+            addLog(`🏗️ Initializing Vapi (Key: ${config.vapiPublicKey.substring(0, 8)}...)`);
+            vapiInstance = new VapiSDK(config.vapiPublicKey);
+
+            vapiInstance.on('call-start', () => {
+                statusText.innerText = "Status: Connected";
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'block';
+                agentSelect.disabled = true;
+                addLog("🚀 Call started");
+            });
+
+            vapiInstance.on('call-end', () => {
+                statusText.innerText = "Status: Call Ended";
+                startBtn.style.display = 'block';
+                stopBtn.style.display = 'none';
+                agentSelect.disabled = false;
+                addLog("🏁 Call ended");
+            });
+
+            vapiInstance.on('message', (message) => {
+                if (message.type === 'transcript' && message.transcriptType === 'final') {
+                    addLog(`${message.role === 'assistant' ? '🤖' : '👤'}: ${message.transcript}`, true);
+                }
+            });
+
+            vapiInstance.on('error', (e) => {
+                console.error("📛 Vapi Error Event:", e);
+                statusText.innerText = "Status: Error";
+
+                let errorMsg = "Unknown error";
+                if (typeof e.error === 'string') errorMsg = e.error;
+                else if (e.error?.message) errorMsg = typeof e.error.message === 'object' ? JSON.stringify(e.error.message) : e.error.message;
+                else if (e.message) errorMsg = typeof e.message === 'object' ? JSON.stringify(e.message) : e.message;
+
+                addLog("❌ Error: " + errorMsg);
+            });
+        }
+
+        startBtn.onclick = async () => {
+            const agentId = agentSelect.value;
+            if (!agentId) return;
+
+            try {
+                statusText.innerText = "Status: Initializing...";
+                if (!vapiInstance) await initVapi();
+
+                statusText.innerText = "Status: Connecting...";
+                addLog(`📡 Fetching settings for agent: ${agentId}`);
+
+                const res = await fetch('/api/assistant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agentId })
+                });
+
+                const assistant = await res.json();
+                if (assistant.error) throw new Error(assistant.error);
+
+                // Ensure metadata contains agentId for webhook tracking
+                assistant.metadata = {
+                    ...assistant.metadata,
+                    agentId: agentId
+                };
+
+                addLog("🎨 Config fetched, starting call...");
+                console.log("📤 Sending Assistant Config to Vapi:", assistant);
+                vapiInstance.start(assistant);
+            } catch (e) {
+                addLog("❌ Failed: " + e.message);
+                statusText.innerText = "Status: Failed to start";
+            }
+        };
+
+        stopBtn.onclick = () => {
+            if (vapiInstance) vapiInstance.stop();
+        };
+
+        loadConfig();
+        loadAgents();
+    </script>
+</body>
+
+</html>

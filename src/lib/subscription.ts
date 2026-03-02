@@ -1,8 +1,16 @@
+
 import { db } from "./db";
 import { subscription, user } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { stripe, createStripeCustomer } from "./stripe-server";
 import type Stripe from "stripe";
+
+// Helper to safely convert Stripe timestamp to Date
+function SAFE_DATE(timestamp: number | null | undefined): Date | null {
+  if (!timestamp) return null;
+  const date = new Date(timestamp * 1000);
+  return isNaN(date.getTime()) ? null : date;
+}
 
 export interface SubscriptionData {
   id: string;
@@ -72,47 +80,109 @@ export async function upsertSubscription(
   userId: string,
   stripeSubscription: Stripe.Subscription
 ): Promise<SubscriptionData> {
+  // Ensure priceId is a string, handle if it's an object (though usually expanded only if requested)
+  // Casting 'stripeSubscription' to any because sometimes types from Stripe SDK can be tricky with expansions
+  const subAny = stripeSubscription as any;
+  const priceId =
+    typeof subAny.items.data[0]?.price === "string"
+      ? subAny.items.data[0]?.price
+      : subAny.items.data[0]?.price?.id;
+  const plan = priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ID ? "pro" : "free";
+
+  const currentPeriodStart = SAFE_DATE(subAny.current_period_start) || new Date();
+  const currentPeriodEnd = SAFE_DATE(subAny.current_period_end) || new Date();
+
+  console.log(`[upsertSubscription] Dates for ${stripeSubscription.id}: Start = ${currentPeriodStart.toISOString()}, End = ${currentPeriodEnd.toISOString()} `);
+
   const subscriptionData = {
     userId,
-    plan: "pro",
+    plan,
     status: stripeSubscription.status,
     stripeCustomerId: stripeSubscription.customer as string,
     stripeSubscriptionId: stripeSubscription.id,
-    stripePriceId: stripeSubscription.items.data[0]?.price.id || null,
-    currentPeriodStart: new Date(
-      (stripeSubscription as any).current_period_start * 1000
-    ),
-    currentPeriodEnd: new Date(
-      (stripeSubscription as any).current_period_end * 1000
-    ),
-    cancelAtPeriodEnd:
-      (stripeSubscription as any).cancel_at_period_end || false,
+    stripePriceId: priceId || null,
+    currentPeriodStart,
+    currentPeriodEnd,
+    cancelAtPeriodEnd: subAny.cancel_at_period_end || false,
     updatedAt: new Date(),
   };
 
   // Check if subscription already exists
-  const existingSubscription = await getUserSubscription(userId);
+  // Priority 1: Check by Stripe Subscription ID (Most specific)
+  let [existingSubscription] = await db
+    .select()
+    .from(subscription)
+    .where(eq(subscription.stripeSubscriptionId, stripeSubscription.id))
+    .limit(1);
+
+  // Priority 2: Check by Stripe Customer ID (Next specific)
+  if (!existingSubscription) {
+    [existingSubscription] = await db
+      .select()
+      .from(subscription)
+      .where(eq(subscription.stripeCustomerId, stripeSubscription.customer as string))
+      .limit(1);
+  }
+
+  // Priority 3: Check by User ID (Fallback for fresh upgrades)
+  // Only do this if we didn't find a "Pro" record already.
+  // This prevents us from grabbing a "Free" row and trying to update it
+  // with a Customer ID that already exists on a "Pro" row (hidden duplicate).
+  if (!existingSubscription) {
+    [existingSubscription] = await db
+      .select()
+      .from(subscription)
+      .where(eq(subscription.userId, userId))
+      .limit(1);
+  }
 
   if (existingSubscription) {
     // Update existing subscription
-    const [updatedSubscription] = await db
-      .update(subscription)
-      .set(subscriptionData)
-      .where(eq(subscription.userId, userId))
-      .returning();
-
-    return updatedSubscription;
+    try {
+      const [updatedSubscription] = await db
+        .update(subscription)
+        .set(subscriptionData)
+        .where(eq(subscription.id, existingSubscription.id))
+        .returning();
+      return updatedSubscription;
+    } catch (error: any) {
+      // Handle race condition where unique constraint is violated
+      if (error.code === '23505' && error.constraint === 'subscription_stripe_customer_id_unique') {
+        console.log(`[upsertSubscription] Race condition detected: Customer ID ${stripeSubscription.customer} already exists on another row.`);
+        // Fetch the row that won the race
+        const [winner] = await db
+          .select()
+          .from(subscription)
+          .where(eq(subscription.stripeCustomerId, stripeSubscription.customer as string))
+          .limit(1);
+        return winner;
+      }
+      throw error;
+    }
   } else {
     // Create new subscription
-    const [newSubscription] = await db
-      .insert(subscription)
-      .values({
-        ...subscriptionData,
-        createdAt: new Date(),
-      })
-      .returning();
-
-    return newSubscription;
+    try {
+      const [newSubscription] = await db
+        .insert(subscription)
+        .values({
+          ...subscriptionData,
+          createdAt: new Date(),
+        })
+        .returning();
+      return newSubscription;
+    } catch (error: any) {
+      // Handle race condition where unique constraint is violated (another thread inserted first)
+      if (error.code === '23505' && error.constraint === 'subscription_stripe_customer_id_unique') {
+        console.log(`[upsertSubscription] Insert Race condition detected: Customer ID ${stripeSubscription.customer} already exists.`);
+        const [winner] = await db
+          .select()
+          .from(subscription)
+          .where(eq(subscription.stripeCustomerId, stripeSubscription.customer as string))
+          .limit(1);
+        return winner;
+      }
+      throw error;
+    }
   }
 }
 

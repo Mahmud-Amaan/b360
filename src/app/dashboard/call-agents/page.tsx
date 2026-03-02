@@ -1,158 +1,156 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import { useEffect } from "react";
+import { useAgentsStore } from "@/store/useAgentsStore";
 import { Button } from "@/components/ui/button";
 import {
-    Phone,
-    Clock,
-    Users,
-    TrendingUp,
-    Plus,
-    ExternalLink,
-} from "lucide-react";
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Phone, Settings, Eye } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
-export const dynamic = "force-dynamic";
+export default function CallAgentsPage() {
+    const { agents, isLoading, fetchAgents } = useAgentsStore();
 
-interface DashboardData {
-    stats: {
-        totalCalls: number;
-        totalMinutes: number;
-        activeNumbers: number;
-        avgCallDuration: number;
-    };
-}
+    useEffect(() => {
+        fetchAgents();
+    }, [fetchAgents]);
 
-async function getCallDashboardData(): Promise<DashboardData> {
-    return {
-        stats: {
-            totalCalls: 0,
-            totalMinutes: 0,
-            activeNumbers: 0,
-            avgCallDuration: 0,
-        },
-    };
-}
-
-export default async function CallDashboardPage() {
-    const data = await getCallDashboardData();
-
-    if (!data) return null;
+    if (isLoading) {
+        return (
+            <div className="space-y-4 p-6">
+                <div className="flex justify-between items-center">
+                    <Skeleton className="h-8 w-[200px]" />
+                    <Skeleton className="h-10 w-[150px]" />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {[...Array(3)].map((_, i) => (
+                        <Card key={i}>
+                            <CardHeader>
+                                <Skeleton className="h-6 w-[150px]" />
+                                <Skeleton className="h-4 w-[200px]" />
+                            </CardHeader>
+                            <CardContent>
+                                <Skeleton className="h-[100px] w-full" />
+                            </CardContent>
+                            <CardFooter>
+                                <Skeleton className="h-10 w-full" />
+                            </CardFooter>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="space-y-8 p-6">
-            {/* Stats Overview */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="hover:shadow-md transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Total Calls
-                        </CardTitle>
-                        <Phone className="h-4 w-4 text-blue-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {data.stats.totalCalls.toLocaleString()}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-md transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Total Minutes
-                        </CardTitle>
-                        <Clock className="h-4 w-4 text-purple-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {(data.stats.totalMinutes / 60).toFixed(1)}h
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-md transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Active Phone Numbers
-                        </CardTitle>
-                        <Users className="h-4 w-4 text-emerald-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{data.stats.activeNumbers}</div>
-                    </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-md transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Avg Call Duration
-                        </CardTitle>
-                        <TrendingUp className="h-4 w-4 text-orange-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{data.stats.avgCallDuration}m</div>
-                    </CardContent>
-                </Card>
+        <div className="space-y-10 p-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">AI Call Agents</h1>
+                    <p className="text-gray-600 mt-1">
+                        Manage your AI-powered voice agents and phone numbers
+                    </p>
+                </div>
+                <Link href="/dashboard/call-agents/new">
+                    <Button className="bg-indigo-600 hover:bg-indigo-700">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Agent
+                    </Button>
+                </Link>
             </div>
 
-            {/* Phone Numbers Section */}
-            <Card className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Phone className="h-5 w-5 text-blue-600" />
-                            <CardTitle className="text-xl">Phone Numbers</CardTitle>
-                            <Badge
-                                variant="secondary"
-                                className="bg-blue-100 text-blue-700"
-                            >
-                                {data.stats.activeNumbers}
-                            </Badge>
-                        </div>
-                        <Link href="/dashboard/phone-numbers">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="flex items-center gap-1"
-                            >
-                                View All
-                                <ExternalLink className="h-3 w-3" />
-                            </Button>
-                        </Link>
+            {/* Agents Grid */}
+            {agents.length === 0 ? (
+                <div className="text-center py-12">
+                    <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <Phone className="h-12 w-12 text-gray-400" />
                     </div>
-                </CardHeader>
-                <CardContent>
-                    {data.stats.activeNumbers === 0 ? (
-                        <div className="text-center py-12">
-                            <Phone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold mb-2">
-                                No phone numbers added yet
-                            </h3>
-                            <p className="text-muted-foreground mb-4">
-                                Add your first phone number to start tracking calls.
-                            </p>
-                            <Link href="/dashboard/call-agents/new">
-                                <Button className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4" />
-                                    Add Phone Number
-                                </Button>
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="text-center py-8">
-                            <p className="text-muted-foreground">
-                                You have {data.stats.activeNumbers} active phone number
-                                {data.stats.activeNumbers !== 1 ? "s" : ""}.
-                            </p>
-                            <Link href="/dashboard/phone-numbers">
-                                <Button variant="outline" className="mt-4 bg-transparent">
-                                    Manage Numbers
-                                </Button>
-                            </Link>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No call agents yet
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                        Create your first AI call agent to start handling phone calls
+                    </p>
+                    <Link href="/dashboard/call-agents/new">
+                        <Button className="bg-indigo-600 hover:bg-indigo-700">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Create Your First Agent
+                        </Button>
+                    </Link>
+                </div>
+            ) : (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {agents.map((agent) => (
+                        <Card
+                            key={agent.id}
+                            className="hover:shadow-lg transition-shadow duration-200"
+                        >
+                            <CardHeader className="pb-3">
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-lg font-semibold text-gray-900">
+                                        {agent.name}
+                                    </CardTitle>
+                                    <Badge
+                                        variant={agent.isActive ? "default" : "secondary"}
+                                        className={
+                                            agent.isActive ? "bg-green-100 text-green-800" : ""
+                                        }
+                                    >
+                                        {agent.isActive ? "Active" : "Inactive"}
+                                    </Badge>
+                                </div>
+                                <CardDescription className="text-sm text-gray-600">
+                                    Created {new Date(agent.createdAt).toLocaleDateString()}
+                                </CardDescription>
+                            </CardHeader>
+
+                            <CardContent className="pb-3">
+                                <div className="space-y-3">
+                                    {/* Phone Number */}
+                                    <div className="flex items-center space-x-2">
+                                        <Phone className="h-4 w-4 text-blue-600" />
+                                        <span className="text-sm font-medium text-gray-700">
+                                            {agent.phoneNumber}
+                                        </span>
+                                    </div>
+
+                                    {/* Voice */}
+                                    <p className="text-sm text-gray-600">
+                                        <span className="font-medium">Voice:</span>{" "}
+                                        {agent.voice || "female"}
+                                    </p>
+                                </div>
+                            </CardContent>
+
+                            <CardFooter className="pt-3 border-t border-gray-100">
+                                <div className="flex w-full gap-2">
+                                    <Link href={`/dashboard/call-agents/${agent.id}`}>
+                                        <Button size="sm" className="w-full">
+                                            <Eye className="mr-1 h-3 w-3" />
+                                            View
+                                        </Button>
+                                    </Link>
+                                    <Link href={`/dashboard/call-agents/${agent.id}/edit`}>
+                                        <Button size="sm">
+                                            <span className="mr-2">Edit</span>
+                                            <Settings className="h-3 w-3" />
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

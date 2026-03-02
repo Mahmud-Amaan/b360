@@ -9,6 +9,7 @@ import {
   json,
   decimal,
   uuid,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { AdapterAccount } from "next-auth/adapters";
@@ -221,4 +222,89 @@ export const testimonial = pgTable("testimonial", {
 
 export const testimonialRelations = relations(testimonial, ({ }) => ({
   // No relations for testimonial
+}));
+
+export const agent = pgTable("agent", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .references(() => user.id)
+    .notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  phoneNumber: text("phone_number").unique(),
+  phoneSid: text("phone_sid"), // Twilio SID
+  vapiPhoneNumberId: text("vapi_phone_number_id"), // Vapi phone number ID for inbound call routing
+  clientId: text("client_id").unique(), // Twilio Client identity (e.g., client:name)
+  voice: text("voice").default("female"),
+  welcomeMessage: text("welcome_message"),
+  businessContext: text("business_context"),
+  businessType: text("business_type"),
+  availabilityContext: text("availability_context"),
+  adminEmail: text("admin_email"),
+  zapierWebhookUrl: text("zapier_webhook_url"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const agentRelations = relations(agent, ({ one, many }) => ({
+  user: one(user, { fields: [agent.userId], references: [user.id] }),
+  callLogs: many(callLogs),
+}));
+
+export const callLogs = pgTable("call_logs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  agentId: uuid("agent_id")
+    .references(() => agent.id, { onDelete: "cascade" })
+    .notNull(),
+  callSid: text("call_sid").unique(), // Twilio Call SID
+  vapiCallId: text("vapi_call_id").unique(), // Vapi Call ID
+  callerNumber: text("caller_number"),
+  duration: integer("duration"), // in seconds
+  summary: text("summary"),
+  transcript: text("transcript"),
+  recordingUrl: text("recording_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    agentIdIdx: index("call_logs_agent_id_idx").on(table.agentId),
+    vapiCallIdIdx: index("call_logs_vapi_call_id_idx").on(table.vapiCallId),
+    createdAtIdx: index("call_logs_created_at_idx").on(table.createdAt),
+  };
+});
+
+export const callLogsRelations = relations(callLogs, ({ one, many }) => ({
+  agent: one(agent, { fields: [callLogs.agentId], references: [agent.id] }),
+  bookings: many(bookings),
+}));
+
+export const bookings = pgTable("bookings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  agentId: uuid("agent_id")
+    .references(() => agent.id, { onDelete: "cascade" })
+    .notNull(),
+  callLogId: uuid("call_log_id")
+    .references(() => callLogs.id, { onDelete: "cascade" })
+    .notNull(),
+  customerName: text("customer_name"),
+  customerEmail: text("customer_email"),
+  customerPhone: text("customer_phone"),
+  bookingDate: timestamp("booking_date"),
+  serviceDetails: text("service_details"),
+  status: text("status").default("confirmed").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    bookingsAgentIdIdx: index("bookings_agent_id_idx").on(table.agentId),
+    bookingsCallLogIdIdx: index("bookings_call_log_id_idx").on(table.callLogId),
+  };
+});
+
+export const bookingsRelations = relations(bookings, ({ one }) => ({
+  agent: one(agent, { fields: [bookings.agentId], references: [agent.id] }),
+  callLog: one(callLogs, {
+    fields: [bookings.callLogId],
+    references: [callLogs.id],
+  }),
 }));

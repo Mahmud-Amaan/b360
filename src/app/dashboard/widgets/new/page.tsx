@@ -288,7 +288,7 @@ export default function NewWidgetPage() {
                   </div>
 
                   {/* Submit Buttons */}
-                  <div className="flex justify-end space-x-3 pt-6">
+                  <div className="flex justify-end gap-3 pt-6">
                     <Button
                       type="button"
                       variant="outline"

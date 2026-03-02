@@ -53,7 +53,7 @@ export default function WidgetsPage() {
   return (
     <div className="space-y-10">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Widgets</h1>
           <p className="text-gray-600 mt-1">
@@ -137,7 +137,7 @@ export default function WidgetsPage() {
               </CardContent>
 
               <CardFooter className="pt-3 border-t border-gray-100">
-                <div className="flex w-full space-x-2">
+                <div className="flex w-full gap-2">
                   <Link href={`/dashboard/widgets/${widget.id}`}>
                     <Button size="sm" className="w-full">
                       <Eye className="mr-1 h-3 w-3" />

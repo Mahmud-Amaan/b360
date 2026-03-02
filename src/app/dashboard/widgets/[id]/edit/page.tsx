@@ -232,10 +232,10 @@ export default function EditWidgetPage({
                           form.setValue(
                             "position",
                             value as
-                              | "bottom-right"
-                              | "bottom-left"
-                              | "top-right"
-                              | "top-left"
+                            | "bottom-right"
+                            | "bottom-left"
+                            | "top-right"
+                            | "top-left"
                           )
                         }
                       >
@@ -376,7 +376,7 @@ export default function EditWidgetPage({
                 </div>
 
                 {/* Submit Buttons */}
-                <div className="flex justify-end space-x-3 pt-6">
+                <div className="flex justify-end gap-3 pt-6">
                   <Button
                     type="button"
                     variant="outline"

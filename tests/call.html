@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Twilio Voice Test</title>
+    <script src="twilio.min.js"></script>
+    <script>console.log("Twilio Script Tag processed");</script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            text-align: center;
+            background: #f9fafb;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+
+        #callBtn {
+            background: #10b981;
+            color: white;
+        }
+
+        #callBtn:hover {
+            background: #059669;
+        }
+
+        #controls {
+            margin-top: 10px;
+        }
+
+        .danger {
+            background: #ef4444;
+            color: white;
+            display: none;
+        }
+
+        .danger:hover {
+            background: #dc2626;
+        }
+
+        .secondary {
+            background: #6b7280;
+            color: white;
+            display: none;
+        }
+
+        .secondary:hover {
+            background: #4b5563;
+        }
+
+        .warning {
+            background: #f59e0b !important;
+        }
+
+        #activeInfo {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .volume-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        #volumeLevel {
+            width: 0%;
+            height: 100%;
+            background: #3b82f6;
+            transition: width 0.1s;
+        }
+
+        #timer {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        #status {
+            margin-top: 20px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .loader {
+            display: none;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .diag-controls {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #4b5563;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Twilio Voice Web Call</h2>
+        <div id="loader" class="loader"></div>
+
+        <div id="controls">
+            <button id="callBtn">Start Call</button>
+            <button id="hangupBtn" class="danger">Hang Up</button>
+            <button id="muteBtn" class="secondary">Mute</button>
+        </div>
+
+        <div class="diag-controls">
+            <label>
+                <input type="checkbox" id="useFakeAudio" checked> Use Fake Audio (bypass mic issues)
+            </label>
+            <button onclick="checkDevices()"
+                style="background: #3b82f6; color: white; padding: 6px 12px; font-size: 11px; align-self: center; width: auto;">Check
+                Microphones</button>
+        </div>
+
+        <div id="activeInfo">
+            <div class="volume-bar">
+                <div id="volumeLevel"></div>
+            </div>
+            <p id="timer">00:00</p>
+        </div>
+
+        <p id="status">Status: idle</p>
+    </div>
+
+    <script>
+        let device = null;
+        let activeCall = null;
+        let timerInterval = null;
+        let seconds = 0;
+
+        const callBtn = document.getElementById("callBtn");
+        const hangupBtn = document.getElementById("hangupBtn");
+        const muteBtn = document.getElementById("muteBtn");
+        const statusText = document.getElementById("status");
+        const loader = document.getElementById("loader");
+        const activeInfo = document.getElementById("activeInfo");
+        const timerText = document.getElementById("timer");
+        const volumeLevel = document.getElementById("volumeLevel");
+        const useFakeAudio = document.getElementById("useFakeAudio");
+
+        async function checkDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                console.log("--- Media Devices ---");
+                devices.forEach(d => console.log(`${d.kind}: ${d.label} (ID: ${d.deviceId})`));
+                const mics = devices.filter(d => d.kind === 'audioinput');
+                alert(`Found ${mics.length} microphones. Check the console for details.`);
+            } catch (err) {
+                console.error("Device check failed:", err);
+                alert("Could not list devices. Ensure you are on HTTPS or localhost.");
+            }
+        }
+
+        async function initDevice() {
+            if (typeof Twilio === 'undefined') {
+                throw new Error("Twilio SDK not loaded. Please wait or check your connection.");
+            }
+
+            // --- MEDIA MOCKER START ---
+            if (useFakeAudio.checked) {
+                console.log("🛠️ Mocking MediaDevices to bypass hardware...");
+                const originalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+                navigator.mediaDevices.getUserMedia = async (constraints) => {
+                    console.log("🎙️ Intercepted getUserMedia request", constraints);
+                    try {
+                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioCtx.createOscillator();
+                        const dst = audioCtx.createMediaStreamDestination();
+                        oscillator.connect(dst);
+                        oscillator.start();
+                        console.log("✅ Provided virtual silent stream.");
+                        return dst.stream;
+                    } catch (e) {
+                        console.error("Failed to create mock stream, falling back to original", e);
+                        return originalGetUserMedia(constraints);
+                    }
+                };
+            }
+            // --- MEDIA MOCKER END ---
+
+            // Re-initialize if preference changed
+            if (device) {
+                // Safer check for different SDK versions
+                const isCurrentlyFake = device.options && device.options.fakeLocalAndRemoteAudio === true;
+                if (isCurrentlyFake === useFakeAudio.checked) return;
+
+                console.log("Preference changed or options missing. Rebuilding device...");
+                try { device.destroy(); } catch (e) { }
+                device = null;
+            }
+
+            statusText.innerText = "Initializing Device...";
+            const res = await fetch("/token");
+            const data = await res.json();
+
+            console.log("Initializing device. Fake Audio:", useFakeAudio.checked);
+
+            device = new Twilio.Device(data.token, {
+                codecPreferences: ["opus", "pcmu"],
+                fakeLocalAndRemoteAudio: useFakeAudio.checked,
+                enableIceRestart: true,
+                maxCallSignalingTimeoutMs: 30000
+            });
+
+            device.on("registered", () => {
+                console.log("Twilio Device Registered");
+                statusText.innerText = "Device Ready";
+            });
+
+            device.on("error", (err) => {
+                console.error("Twilio Device Error:", err);
+                statusText.innerText = "Device Error: " + err.description;
+            });
+        }
+
+        async function startCall() {
+            try {
+                loader.style.display = "block";
+                callBtn.disabled = true;
+
+                await initDevice();
+
+                if (device.state === 'unregistered') {
+                    console.log("Registering device...");
+                    await device.register();
+                }
+
+                statusText.innerText = "Connecting...";
+
+                const call = await device.connect({
+                    To: "client:test-user",
+                    AgentId: "test-agent"
+                });
+
+                activeCall = call;
+
+                call.on("accept", () => {
+                    console.log("Call Accepted");
+                    statusText.innerText = "Connected";
+
+                    callBtn.style.display = "none";
+                    hangupBtn.style.display = "inline-block";
+                    muteBtn.style.display = "inline-block";
+                    activeInfo.style.display = "block";
+                    loader.style.display = "none";
+
+                    startTimer();
+                });
+
+                call.on("disconnect", () => {
+                    console.log("Disconnected");
+                    handleEnd();
+                });
+
+                call.on("error", (err) => {
+                    console.error("Call Error:", err);
+                    statusText.innerText = "Error: " + err.message;
+                    handleEnd();
+                });
+
+                call.on("volume", (v) => {
+                    volumeLevel.style.width = (v * 100) + "%";
+                });
+
+            } catch (err) {
+                console.error("Failed to start call:", err);
+                statusText.innerText = "Failed: " + err.message;
+                handleEnd();
+            }
+        }
+
+        function toggleMute() {
+            if (activeCall) {
+                const isMuted = activeCall.isMuted();
+                activeCall.mute(!isMuted);
+                muteBtn.innerText = !isMuted ? "Unmute" : "Mute";
+                muteBtn.classList.toggle("warning", !isMuted);
+            }
+        }
+
+        function hangupCall() {
+            if (device && activeCall) {
+                activeCall.disconnect();
+            }
+        }
+
+        function handleEnd() {
+            statusText.innerText = "Call Ended";
+            callBtn.disabled = false;
+            callBtn.style.display = "inline-block";
+            hangupBtn.style.display = "none";
+            muteBtn.style.display = "none";
+            activeInfo.style.display = "none";
+            loader.style.display = "none";
+            stopTimer();
+            activeCall = null;
+        }
+
+        function startTimer() {
+            seconds = 0;
+            timerText.innerText = "00:00";
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const secs = (seconds % 60).toString().padStart(2, '0');
+                timerText.innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        callBtn.onclick = startCall;
+        hangupBtn.onclick = hangupCall;
+        muteBtn.onclick = toggleMute;
+    </script>
+</body>
+
+</html>

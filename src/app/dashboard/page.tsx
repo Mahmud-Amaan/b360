@@ -59,7 +59,7 @@ export default async function DashboardPage() {
       {/* Widgets Section */}
       <Card className="hover:shadow-md transition-shadow">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Widgets className="h-5 w-5 text-purple-600" />
               <CardTitle className="text-xl">Active Widgets</CardTitle>

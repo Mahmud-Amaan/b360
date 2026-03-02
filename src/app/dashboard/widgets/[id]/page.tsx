@@ -122,7 +122,7 @@ export default function WidgetViewPage({
   return (
     <div className="max-w-7xl mx-auto py-8 space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{widget.name}</h1>
           <p className="text-gray-600 mt-1">
@@ -130,19 +130,18 @@ export default function WidgetViewPage({
           </p>
           <div className="flex items-center space-x-4 mt-3">
             <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                widget.isActive
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${widget.isActive
                   ? "bg-green-100 text-green-800"
                   : "bg-gray-100 text-gray-800"
-              }`}
+                }`}
             >
               {widget.isActive ? "Active" : "Inactive"}
             </span>
           </div>
         </div>
-        <div className="flex space-x-3">
-          <Link href={`/dashboard/widgets/${widget.id}/edit`}>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">
+        <div className="flex gap-3 w-full sm:w-auto">
+          <Link href={`/dashboard/widgets/${widget.id}/edit`} className="w-full sm:w-auto">
+            <Button className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
               <Edit className="mr-2 h-4 w-4" />
               Edit Configuration
             </Button>
@@ -193,7 +192,7 @@ export default function WidgetViewPage({
                 </div>
               </div>
             </div>
-            
+
             {/* Code snippet - centered and larger */}
             <div className="space-y-4 max-w-4xl mx-auto">
               <h4 className="font-semibold text-gray-900 text-lg text-center">Integration Code:</h4>
