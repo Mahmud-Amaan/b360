@@ -22,12 +22,14 @@ export function generateVapiAssistantConfig(options: AssistantConfigOptions) {
 
     const bookingTool = createBookingTool(baseUrl, agentId);
 
+    // Latest Vapi V2 Schema
     const assistant: Record<string, any> = {
+        name: name,
         firstMessage: welcomeMessage || "Hello! How can I help you today?",
         model: {
             provider: "groq",
-            model: "llama-3.3-70b-versatile",
-            temperature: 0.5,
+            model: "llama3-70b-8192", // More standard Groq model ID for Vapi
+            temperature: 0.7,
             messages: [
                 {
                     role: "system",
@@ -44,70 +46,34 @@ export function generateVapiAssistantConfig(options: AssistantConfigOptions) {
             model: "nova-2",
             language: "en-US",
         },
-        silenceTimeoutSeconds: 60,
-        maxDurationSeconds: 600,
-        backgroundSound: "office",
-        endCallFunctionEnabled: true,
-        endCallMessage: "Thank you for calling! Have a wonderful day. Goodbye!",
-        serverUrl: `${baseUrl}/api/vapi/webhook`,
-        metadata: {
-            agentId: agentId,
+        // Correct V2 structure for the server URL
+        server: {
+            url: `${baseUrl}/api/vapi/webhook`,
+            timeoutSeconds: 20
         },
-        // Tools at the assistant top level (Vapi server-side tools)
+        // Top-level tools array
         tools: [bookingTool],
+        // Safety settings
+        endCallFunctionEnabled: true,
+        silenceTimeoutSeconds: 30,
+        maxDurationSeconds: 600,
+        backgroundSound: "office"
     };
 
     return assistant;
 }
 
 function generateSystemPrompt(options: AssistantConfigOptions) {
-    return `You are a professional and friendly AI Voice Assistant for ${options.name}. Your primary goal is to assist callers efficiently while strictly adhering to the provided business information.
+    return `You are a professional AI Voice Assistant for ${options.name}.
+    
+## Context
+About the Business: ${options.businessContext || "General Inquiry"}
+Business Type: ${options.businessType || "Not specified"}
+Availability: ${options.availabilityContext || "Standard hours"}
 
-## CRITICAL KNOWLEDGE ENFORCEMENT
-1. **ABSOLUTE SOURCE OF TRUTH**: usage of external knowledge or "common sense" assumptions about the business type or name is STRICTLY FORBIDDEN. You effectively know NOTHING about the business other than what is explicitly written in the "About the Business" section below.
-2. **NO HALLUCINATIONS**: If the "About the Business" section does not mention a specific service, price, person, location, or policy, IT DOES NOT EXIST. Do not invent it.
-3. **HANDLING UNKNOWN INFO**: If a user asks for information not present in the context below, you MUST say: "I don't have that specific information right now, but I can note down your question and have a team member contact you." Do NOT try to answer based on what typical businesses of this type do.
-
-## About the Business
-${options.businessContext || "No specific business details provided. Please treat this as a general answering service and offer to take messages."}
-
-## Business Type
-${options.businessType || "General Inquiry"}
-
-## Availability
-${options.availabilityContext || "Standard business hours."}
-
-## Current Date and Time
-Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}. 
-The current local time is ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}. 
-Use this ONLY for understanding relative dates (e.g., "tomorrow"). DO NOT use this to assume the user wants to book "right now".
-
-## Booking Process (STRICT FLOW)
-You MUST follow these steps in order:
-1. **Ask for Date and Time**: "When would you like to come in?" or "What date and time works best for you?"
-2. **Confirm Service/Reason**: "What is this appointment for?" (Only if not already clear)
-3. **Ask for Name**: "May I have your full name?"
-4. **Ask for Email**: "What is the best email address to send the confirmation to?"
-   - **Capture E-mail Carefully**: Ask them to spell it out if unclear.
-   - **Example**: spell this mahmud.hasan.amaan848@gmail.com to this instead M A H M U D dot H A S A N dot A M A A N 8 4 8 (just spell @gmail.com normally)
-5. **VERBAL CONFIRMATION (REQUIRED)**:
-   - YOU MUST READ BACK THE DETAILS: "Let me double check that. I have a booking for [Name] at [Email] on [Date] at [Time] for [Service]. Is that correct?"
-   - **WAIT** for the user to say "Yes" or similar.
-   - If they say "No", ask which part needs correction.
-    - But Remember Don't Repeat Yourself Too Much, Don't annoy the user.
-6. **Execute Booking**: ONLY after a clear "Yes", call the 'book_appointment' tool.
-7. **Important**: If the tool returns an error saying the email is invalid, you MUST ask the user to spell it again carefully.
-
-## Ending Calls
-- **Wait for the customer to finish.** Do not end the call unless they explicitly say they are done or say "goodbye".
-- If the customer says "bye", "goodbye", "that's all", "I'm done", or similar, then end the call politely.
-- After completing a booking, ask: "Is there anything else I can help you with today?"
-- **ONLY** end the call after the customer confirms they have no more questions.
-- Always be polite: "Thank you for calling! Have a great day. Goodbye."
-
-## Communication Guidelines
-- Speak naturally and conversationally
-- Be warm, professional, and helpful
-- Keep responses concise - this is a phone call
-- Confirm important details by repeating them back`;
+## Instructions
+- Be concise. This is a phone call.
+- Follow the sequence: 1. Confirm time -> 2. Name -> 3. Email -> 4. Summary -> 5. Book.
+- Only call 'book_appointment' AFTER the user explicitly confirms the recap.
+- If you don't know something, offer to take a message.`;
 }
