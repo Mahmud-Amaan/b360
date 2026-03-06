@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { agent as agentTable } from "@/db/schema";
-import { eq, or } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getBaseUrl } from "@/lib/utils";
 import { generateVapiAssistantConfig } from "@/lib/vapi-config";
@@ -12,6 +12,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Empty body" }, { status: 200 });
         }
         const body = JSON.parse(text);
+        console.log("Vapi request body:", JSON.stringify(body, null, 2));
 
         // Vapi sends the message type at the top level
         const messageType = body.message?.type || body.type;
@@ -23,37 +24,57 @@ export async function POST(req: Request) {
             return NextResponse.json({ received: true });
         }
 
-        // Extract the phone number being called - try multiple locations
+        // Extract the phone number being called - exhaustive list of fields
         const phoneNumber =
+            body.message?.call?.to || // Most common for inbound calls
             body.message?.phoneNumber?.number ||
+            body.message?.to ||
             body.phoneNumber?.number ||
             body.message?.call?.phoneNumber?.number ||
             body.call?.phoneNumber?.number ||
-            body.message?.to ||
             body.to;
 
         if (!phoneNumber) {
-            console.error("No phone number in assistant request");
+            console.error("❌ No destination phone number found in request body:", JSON.stringify(body));
             return NextResponse.json({
-                error: "Phone number not found"
+                error: "Phone number not found in request"
             }, { status: 400 });
         }
 
+        console.log(`Searching for agent with phone number: ${phoneNumber}`);
+
+        // Helper to strip non-digits for comparison
+        const stripChars = (num: string) => num.replace(/\D/g, "");
+        const cleanIncoming = stripChars(phoneNumber);
+
+        console.log(`Clean incoming: ${cleanIncoming}`);
+
         // Find the agent associated with this phone number
         const currentAgent = await db.query.agent.findFirst({
-            where: (agentTable, { eq, or }) => or(
-                eq(agentTable.phoneNumber, phoneNumber),
-                // Handle cases where number might have formatting differences
-                eq(agentTable.phoneNumber, phoneNumber.replace(/^\+/, "")),
-                eq(agentTable.phoneNumber, `+${phoneNumber.replace(/^\+/, "")}`),
-                agentTable.vapiPhoneNumberId ? eq(agentTable.vapiPhoneNumberId, body.message?.phoneNumber?.id || "unknown") : undefined
-            )
+            where: (agent, { eq, or, sql }) => {
+                const conditions = [
+                    eq(agent.phoneNumber, phoneNumber),
+                    eq(agent.phoneNumber, cleanIncoming),
+                    eq(agent.phoneNumber, `+${cleanIncoming}`),
+                    sql`REGEXP_REPLACE(${agent.phoneNumber}, '\D', '', 'g') = ${cleanIncoming}`
+                ];
+
+                // If Vapi sent a phone number ID, try to match that too
+                const vapiPhoneId = body.message?.phoneNumber?.id || body.phoneNumber?.id;
+                if (vapiPhoneId) {
+                    conditions.push(eq(agent.vapiPhoneNumberId, vapiPhoneId));
+                }
+
+                return or(...conditions);
+            }
         });
 
         if (!currentAgent) {
-            console.error(`No agent found for phone number: ${phoneNumber}`);
+            console.error(`❌ No agent found for phone number: ${phoneNumber}. Check your dashboard to ensure this number is assigned to an agent.`);
+            console.log("Current body was:", JSON.stringify(body, null, 2));
             return NextResponse.json({
-                error: "No agent configured for this number"
+                error: "No agent configured for this number",
+                details: `Looked for: ${phoneNumber} or ${cleanIncoming}`
             }, { status: 404 });
         }
 
