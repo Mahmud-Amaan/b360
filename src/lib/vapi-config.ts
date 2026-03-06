@@ -33,33 +33,6 @@ export interface AssistantConfigOptions {
     silenceTimeoutSeconds?: number | null;
 }
 
-export interface VapiAssistantConfig {
-    firstMessage: string;
-    model: {
-        provider: string;
-        model: string;
-        temperature: number;
-        messages: Array<{ role: string; content: string }>;
-    };
-    voice: {
-        provider: string;
-        voiceId: string;
-    };
-    transcriber: {
-        provider: string;
-        model: string;
-        language: string;
-    };
-    silenceTimeoutSeconds: number;
-    maxDurationSeconds: number;
-    backgroundSound: string;
-    endCallFunctionEnabled: boolean;
-    endCallMessage: string;
-    serverUrl: string;
-    metadata: Record<string, string>;
-    tools: unknown[];
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────────────────────────────────────
@@ -179,7 +152,7 @@ Ask: "What is the best email address to send the confirmation to?"
 Read back ALL details exactly once:
 "Let me confirm — I have a booking for [Full Name] at [Email] on [Date] at [Time] for [Service]. Is that correct?"
 - Wait for a clear "Yes" (or equivalent) before proceeding.
-- If they say "No", ask which detail needs to be corrected, then fix it and re-confirm.
+- If they say "No", ask which part needs correction, then fix it and re-confirm.
 - Do not repeat the confirmation more than once if they already said yes.
 
 **Step 6 — Execute Booking**
@@ -209,37 +182,17 @@ Only end the call after the caller confirms they have no further questions.
 // Main config builder
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Generates a fully-formed Vapi assistant configuration object.
- *
- * @param options - Configuration options for the assistant.
- * @returns A typed Vapi assistant config ready to POST to the Vapi API.
- *
- * @example
- * ```ts
- * const config = generateVapiAssistantConfig({
- *   name: "Bright Smile Dental",
- *   businessContext: "We offer general dentistry, teeth whitening, and orthodontics.",
- *   businessType: "Dental Clinic",
- *   availabilityContext: "Monday to Friday, 9 AM – 5 PM EST.",
- *   voice: "female",
- *   baseUrl: "https://myapp.com",
- *   agentId: "agent_abc123",
- * });
- * ```
- */
 export function generateVapiAssistantConfig(
     options: AssistantConfigOptions,
-): VapiAssistantConfig {
-    // Validate required fields
+) {
     if (!options.name?.trim()) {
-        throw new Error("AssistantConfigOptions.name is required and cannot be empty.");
+        throw new Error("AssistantConfigOptions.name is required.");
     }
     if (!options.baseUrl?.trim()) {
-        throw new Error("AssistantConfigOptions.baseUrl is required and cannot be empty.");
+        throw new Error("AssistantConfigOptions.baseUrl is required.");
     }
     if (!options.agentId?.trim()) {
-        throw new Error("AssistantConfigOptions.agentId is required and cannot be empty.");
+        throw new Error("AssistantConfigOptions.agentId is required.");
     }
 
     const baseUrl = normalizeBaseUrl(options.baseUrl);
@@ -257,6 +210,18 @@ export function generateVapiAssistantConfig(
         ? Math.max(1, options.silenceTimeoutSeconds)
         : DEFAULTS.SILENCE_TIMEOUT_SECONDS;
 
+    /**
+     * PASSING CREDENTIALS INLINE
+     * Allows using Groq/Deepgram without the Vapi dashboard keys.
+     */
+    const credentials: any[] = [];
+    if (process.env.GROQ_API_KEY) {
+        credentials.push({ provider: "groq", apiKey: process.env.GROQ_API_KEY });
+    }
+    if (process.env.DEEPGRAM_API_KEY) {
+        credentials.push({ provider: "deepgram", apiKey: process.env.DEEPGRAM_API_KEY });
+    }
+
     return {
         firstMessage: options.welcomeMessage?.trim() || DEFAULTS.WELCOME_MESSAGE,
 
@@ -270,6 +235,8 @@ export function generateVapiAssistantConfig(
                     content: generateSystemPrompt(options),
                 },
             ],
+            // FIXED: Tools belong inside the model object
+            tools: [bookingTool],
         },
 
         voice: {
@@ -283,6 +250,7 @@ export function generateVapiAssistantConfig(
             language: options.language?.trim() || DEFAULTS.LANGUAGE,
         },
 
+        credentials, // Inline credentials restored
         silenceTimeoutSeconds,
         maxDurationSeconds,
         backgroundSound: DEFAULTS.BACKGROUND_SOUND,
@@ -294,7 +262,5 @@ export function generateVapiAssistantConfig(
         metadata: {
             agentId: options.agentId,
         },
-
-        tools: [bookingTool],
     };
 }
