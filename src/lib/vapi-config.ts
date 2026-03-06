@@ -1,4 +1,4 @@
-import { createBookingTool, endCallTool } from "./vapi-tools";
+import { createBookingTool } from "./vapi-tools";
 
 export interface AssistantConfigOptions {
     name: string;
@@ -15,37 +15,25 @@ export function generateVapiAssistantConfig(options: AssistantConfigOptions) {
     const {
         name,
         welcomeMessage,
-        businessContext,
-        businessType,
-        availabilityContext,
         voice,
         baseUrl,
         agentId
     } = options;
 
-    const selectedVoice = (voice?.toLowerCase() === "male") ? "elliot" : "lily";
-    const voiceProvider = "playht"; // Lily and Elliot are PlayHT voices
+    // Lily and Elliot are Vapi's own TTS voices (provider: "vapi")
+    const selectedVoice = (voice?.toLowerCase() === "male") ? "Elliot" : "Lily";
+
     const bookingTool = createBookingTool(baseUrl, agentId);
 
+    // Return a minimal, Vapi-compliant transient assistant
+    // Only include fields that are in the official Vapi Assistant schema
     const assistant: Record<string, any> = {
         name: name,
         firstMessage: welcomeMessage || "Hello! How can I help you today?",
-        transcriber: {
-            provider: "deepgram",
-            model: "nova-2",
-            language: "en-US",
-            smartFormat: true,
-        },
-        voice: {
-            provider: voiceProvider,
-            voiceId: selectedVoice,
-        },
-        backchannelingEnabled: false,
         model: {
             provider: "groq",
             model: "llama-3.3-70b-versatile",
             temperature: 0.5,
-            tools: [bookingTool, endCallTool],
             messages: [
                 {
                     role: "system",
@@ -53,36 +41,28 @@ export function generateVapiAssistantConfig(options: AssistantConfigOptions) {
                 }
             ],
         },
-        analysis: {
-            summaryPrompt: `You are an expert note-taker. Your goal is to summarize the call clearly and structuredly for the business owner.
-            
-            Please try to follow this format for your summary:
-            
-            [brief 1-2 sentences overview of the call]
-
-            **Booking Made:** (Or "No Booking Made")
-
-            **Name:** [User Name]
-            **Email:** [User Email]
-            **Service/Purpose:** [Reason for call/booking]
-            **Date & Time:** [Appointment Date/Time]
-            **Outcome:** [Brief detailed explanation of what happened, if booking was successful, and how the call ended.]
-            `
+        voice: {
+            provider: "vapi",
+            voiceId: selectedVoice,
         },
-        server: {
-            url: `${baseUrl}/api/vapi/webhook`,
-            timeoutSeconds: 30,
+        transcriber: {
+            provider: "deepgram",
+            model: "nova-2",
+            language: "en-US",
         },
-        interruptionsEnabled: true,
-        numWordsToInterrupt: 1,
+        endCallFunctionEnabled: true,
+        endCallMessage: "Thank you for calling! Have a wonderful day. Goodbye!",
         silenceTimeoutSeconds: 60,
         maxDurationSeconds: 600,
         backgroundSound: "office",
-        endCallMessage: "Thank you for calling! Have a wonderful day. Goodbye!",
+        serverUrl: `${baseUrl}/api/vapi/webhook`,
         metadata: {
             agentId: agentId,
-        }
+        },
     };
+
+    // Add tools as a top-level array on the assistant (NOT inside model)
+    assistant.tools = [bookingTool];
 
     return assistant;
 }
@@ -127,9 +107,9 @@ You MUST follow these steps in order:
 
 ## Ending Calls
 - **Wait for the customer to finish.** Do not end the call unless they explicitly say they are done or say "goodbye".
-- If the customer says "bye", "goodbye", "that's all", "I'm done", or similar, then use the end_call tool.
+- If the customer says "bye", "goodbye", "that's all", "I'm done", or similar, then end the call politely.
 - After completing a booking, ask: "Is there anything else I can help you with today?"
-- **ONLY** use the end_call tool after the customer confirms they have no more questions.
+- **ONLY** end the call after the customer confirms they have no more questions.
 - Always be polite: "Thank you for calling! Have a great day. Goodbye."
 
 ## Communication Guidelines

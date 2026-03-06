@@ -2,7 +2,6 @@ import { getBaseUrl } from "@/lib/utils";
 
 export const createBookingTool = (baseUrl: string, agentId: string) => ({
     type: "function",
-    async: false, // Synchronous execution to maintain voice context
     function: {
         name: "book_appointment",
         description: "Book an appointment or schedule a meeting for the customer. Use this when the customer wants to make a reservation or schedule a service.",
@@ -32,11 +31,6 @@ export const createBookingTool = (baseUrl: string, agentId: string) => ({
     server: {
         url: `${baseUrl}/api/vapi/tool-calls`,
         timeoutSeconds: 30,
-        secret: agentId // Used for agentId extraction
+        secret: agentId
     }
 });
-
-export const endCallTool = {
-    type: "endCall",
-    // Messages are handled by endCallMessage in assistant config
-};
