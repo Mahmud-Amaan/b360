@@ -33,7 +33,7 @@ export default function RootLayout({
         className={`${inter.variable} ${poppins.variable} font-inter antialiased`}
       >
         <Providers>{children}</Providers>
-        <script src="http://localhost:3000/chatbot-dev.js" data-chatbot-id="94bdfa37-bcb2-4988-80c3-ae5675010610" defer></script>
+        <script src="https://b360-one.vercel.app/chatbot.js" data-chatbot-id="a1185561-ace5-4917-b6d0-3235591d3f2f" defer></script>
       </body>
     </html>
   );
