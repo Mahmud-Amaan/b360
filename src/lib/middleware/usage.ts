@@ -42,7 +42,7 @@ export async function withUsageCheck(
                         error: 'Usage limit exceeded',
                         message: `You have reached your ${options.action} limit for this month.`,
                         limits: {
-                            [options.action]: options.action === 'message' ? limits.messages : limits.widgets
+                            [options.action]: options.action === 'message' ? limits.messages : limits.chatbot
                         },
                         upgrade: userPlan === 'free' ? 'Upgrade to Pro for higher limits' : null
                     },

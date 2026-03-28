@@ -10,7 +10,7 @@ interface UsageContextType {
   widgetCount: number;
   limits: {
     messages: number;
-    widgets: number;
+    chatbot: number;
   };
 
   // Permissions
@@ -19,12 +19,12 @@ interface UsageContextType {
 
   // Remaining quotas
   remainingMessages: number;
-  remainingWidgets: number;
+  remainingChatbot: number;
 
   // Usage percentages
   usagePercentage: {
     messages: number;
-    widgets: number;
+    chatbot: number;
   };
 
   // Plan info
@@ -57,7 +57,7 @@ export function UsageProvider({ children }: UsageProviderProps) {
     canCreateWidget,
     canSendMessage,
     remainingMessages,
-    remainingWidgets,
+    remainingChatbot,
     usagePercentage,
     refreshUsage: refreshUserSettings,
   } = useUserSettings();
@@ -106,7 +106,7 @@ export function UsageProvider({ children }: UsageProviderProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          type: "widgets",
+          type: "chatbot",
           increment: 0, // This will trigger a sync with actual widget count
         }),
       });
@@ -127,7 +127,7 @@ export function UsageProvider({ children }: UsageProviderProps) {
     // Usage data
     messageCount: usage?.messageCount || 0,
     widgetCount: usage?.widgetCount || 0,
-    limits: usage?.limits || { messages: 20, widgets: 1 },
+    limits: usage?.limits || { messages: 20, chatbot: 1 },
 
     // Permissions
     canSendMessage,
@@ -135,7 +135,7 @@ export function UsageProvider({ children }: UsageProviderProps) {
 
     // Remaining quotas
     remainingMessages,
-    remainingWidgets,
+    remainingChatbot,
 
     // Usage percentages
     usagePercentage,

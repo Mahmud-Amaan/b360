@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { MessageSquare } from "lucide-react";
+import { Footer } from "./Footer";
 
 interface PageLayoutProps {
   title: string;
@@ -110,124 +111,5 @@ export function PageLayout({
         </Button>
       </Link>
     </div>
-  );
-}
-
-// Simple Footer Component
-function Footer() {
-  return (
-    <footer className="bg-gray-900 text-white py-16">
-      <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-8 mb-12">
-          {/* Company */}
-          <div>
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="w-8 h-8 bg-gradient-navy-blue rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">B</span>
-              </div>
-              <span className="text-2xl font-bold font-heading">B360</span>
-            </div>
-            <p className="text-gray-400">
-              Expert customer support coverage with strategic hubs across four
-              continents.
-            </p>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h4 className="font-bold mb-4 font-heading">Services</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <Link
-                  href="/customer-support/general"
-                  className="hover:text-white transition-colors"
-                >
-                  General Support
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/customer-support/technical"
-                  className="hover:text-white transition-colors"
-                >
-                  Technical Support
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/customer-support/call-center"
-                  className="hover:text-white transition-colors"
-                >
-                  Call Center
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/customer-support/live-chat"
-                  className="hover:text-white transition-colors"
-                >
-                  Live Chat
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="font-bold mb-4 font-heading">Company</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <Link
-                  href="/about"
-                  className="hover:text-white transition-colors"
-                >
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="hover:text-white transition-colors"
-                >
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/pricing"
-                  className="hover:text-white transition-colors"
-                >
-                  Pricing
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="font-bold mb-4 font-heading">Headquarters</h4>
-            <div className="text-gray-400">
-              <p>401 N Michigan Ave</p>
-              <p>Chicago, IL 60611</p>
-              <p className="mt-4">
-                <Link
-                  href="/contact"
-                  className="text-blue-400 hover:text-blue-300 transition-colors"
-                >
-                  Get in Touch →
-                </Link>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Section */}
-        <div className="border-t border-gray-800 pt-8">
-          <div className="flex flex-col lg:flex-row justify-between items-center text-gray-400 text-sm">
-            <p>© 2025 B360. All Rights Reserved</p>
-          </div>
-        </div>
-      </div>
-    </footer>
   );
 }

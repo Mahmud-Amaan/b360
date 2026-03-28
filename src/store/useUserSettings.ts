@@ -17,7 +17,7 @@ export interface UsageStats {
     period: string; // Billing period key format
     limits: {
         messages: number;
-        widgets: number;
+        chatbot: number;
     };
     resetDate: Date;
     billingPeriodStart?: Date;
@@ -37,10 +37,10 @@ interface UseUserSettingsReturn extends UserSettings {
     canCreateWidget: boolean;
     canSendMessage: boolean;
     remainingMessages: number;
-    remainingWidgets: number;
+    remainingChatbot: number;
     usagePercentage: {
         messages: number;
-        widgets: number;
+        chatbot: number;
     };
 }
 
@@ -101,15 +101,15 @@ export const useUserSettings = (): UseUserSettingsReturn => {
     }, [session?.user, fetchUserSettings]);
 
     // Calculate derived values
-    const canCreateWidget = usage ? usage.widgetCount < usage.limits.widgets : false;
+    const canCreateWidget = usage ? usage.widgetCount < usage.limits.chatbot : false;
     const canSendMessage = usage ? usage.messageCount < usage.limits.messages : false;
     const remainingMessages = usage ? Math.max(0, usage.limits.messages - usage.messageCount) : 0;
-    const remainingWidgets = usage ? Math.max(0, usage.limits.widgets - usage.widgetCount) : 0;
+    const remainingChatbot = usage ? Math.max(0, usage.limits.chatbot - usage.widgetCount) : 0;
 
     const usagePercentage = usage ? {
         messages: Math.min(100, (usage.messageCount / usage.limits.messages) * 100),
-        widgets: Math.min(100, (usage.widgetCount / usage.limits.widgets) * 100),
-    } : { messages: 0, widgets: 0 };
+        chatbot: Math.min(100, (usage.widgetCount / usage.limits.chatbot) * 100),
+    } : { messages: 0, chatbot: 0 };
 
     return {
         plan,
@@ -121,7 +121,7 @@ export const useUserSettings = (): UseUserSettingsReturn => {
         canCreateWidget,
         canSendMessage,
         remainingMessages,
-        remainingWidgets,
+        remainingChatbot,
         usagePercentage,
     };
 }; 

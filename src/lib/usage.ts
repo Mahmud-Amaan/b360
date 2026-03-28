@@ -12,12 +12,12 @@ import { getBillingPeriodKey } from "@/lib/billing";
 
 export interface PlanLimits {
   messages: number;
-  widgets: number;
+  chatbot: number;
 }
 
 export const PLAN_LIMITS: Record<string, PlanLimits> = {
-  free: { messages: 20, widgets: 1 },
-  pro: { messages: 1000, widgets: 10 },
+  free: { messages: 20, chatbot: 1 },
+  pro: { messages: 1000, chatbot: 10 },
 };
 
 export class UsageService {
@@ -238,7 +238,7 @@ export class UsageService {
       case "message":
         return usage.messageCount < limits.messages;
       case "widget":
-        return usage.widgetCount < limits.widgets;
+        return usage.widgetCount < limits.chatbot;
       default:
         return false;
     }
@@ -286,12 +286,12 @@ export class UsageService {
       limits,
       resetDate,
       canSendMessage: usage.messageCount < limits.messages,
-      canCreateWidget: usage.widgetCount < limits.widgets,
+      canCreateWidget: usage.widgetCount < limits.chatbot,
       remainingMessages: Math.max(0, limits.messages - usage.messageCount),
-      remainingWidgets: Math.max(0, limits.widgets - usage.widgetCount),
+      remainingChatbot: Math.max(0, limits.chatbot - usage.widgetCount),
       usagePercentage: {
         messages: Math.min(100, (usage.messageCount / limits.messages) * 100),
-        widgets: Math.min(100, (usage.widgetCount / limits.widgets) * 100),
+        chatbot: Math.min(100, (usage.widgetCount / limits.chatbot) * 100),
       },
     };
   }

@@ -18,9 +18,9 @@ export interface Widget {
   updatedAt: Date;
 }
 
-interface WidgetsStore {
-  // Widgets Data
-  widgets: Widget[];
+interface ChatbotStore {
+  // Chatbot Data
+  chatbot: Widget[];
   selectedWidget: Widget | null;
 
   // Loading States
@@ -29,7 +29,7 @@ interface WidgetsStore {
   hasFetched: boolean;
 
   // Actions
-  fetchWidgets: () => Promise<void>;
+  fetchChatbot: () => Promise<void>;
   createWidget: (
     data: Omit<Widget, "id" | "userId" | "createdAt" | "updatedAt">
   ) => Promise<Widget>;
@@ -42,9 +42,9 @@ interface WidgetsStore {
   getWidgetForEdit: (widgetId: string) => Promise<Widget>;
 }
 
-export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
+export const useChatbotStore = create<ChatbotStore>((set, get) => ({
   // Initial State
-  widgets: [],
+  chatbot: [],
   selectedWidget: null,
 
   isLoading: false,
@@ -52,7 +52,7 @@ export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
   hasFetched: false,
 
   // Actions
-  fetchWidgets: async () => {
+  fetchChatbot: async () => {
     const { hasFetched, isLoading } = get();
 
     // Don't fetch if we already have the data or if we're currently loading
@@ -60,13 +60,13 @@ export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch("/api/widgets");
+      const response = await fetch("/api/chatbot");
       const data = await response.json();
 
       if (!response.ok) throw new Error(data.error);
 
       set({
-        widgets: data.widgets.map(
+        chatbot: data.chatbot.map(
           (widget: Widget & { createdAt: string; updatedAt: string }) => ({
             ...widget,
             createdAt: new Date(widget.createdAt),
@@ -77,7 +77,7 @@ export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
       });
     } catch (error) {
       set({ error: (error as Error).message });
-      toast.error("Failed to fetch widgets");
+      toast.error("Failed to fetch chatbot");
     } finally {
       set({ isLoading: false });
     }
@@ -86,7 +86,7 @@ export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
   createWidget: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch("/api/widgets", {
+      const response = await fetch("/api/chatbot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -102,7 +102,7 @@ export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
       };
 
       set((state) => ({
-        widgets: [...state.widgets, newWidget],
+        chatbot: [...state.chatbot, newWidget],
       }));
 
       toast.success("Widget created successfully");
@@ -119,7 +119,7 @@ export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
   updateWidget: async (id, data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/widgets/${id}`, {
+      const response = await fetch(`/api/chatbot/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -135,7 +135,7 @@ export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
       };
 
       set((state) => ({
-        widgets: state.widgets.map((w) => (w.id === id ? updatedWidget : w)),
+        chatbot: state.chatbot.map((w) => (w.id === id ? updatedWidget : w)),
         selectedWidget:
           state.selectedWidget?.id === id
             ? updatedWidget
@@ -154,7 +154,7 @@ export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
   deleteWidget: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/widgets/${id}`, {
+      const response = await fetch(`/api/chatbot/${id}`, {
         method: "DELETE",
       });
 
@@ -164,7 +164,7 @@ export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
       }
 
       set((state) => ({
-        widgets: state.widgets.filter((w) => w.id !== id),
+        chatbot: state.chatbot.filter((w) => w.id !== id),
         selectedWidget:
           state.selectedWidget?.id === id ? null : state.selectedWidget,
       }));
@@ -183,7 +183,7 @@ export const useWidgetsStore = create<WidgetsStore>((set, get) => ({
   // Add method to get widget for editing (authenticated)
   getWidgetForEdit: async (widgetId: string) => {
     try {
-      const response = await fetch(`/api/widgets/${widgetId}/manage`);
+      const response = await fetch(`/api/chatbot/${widgetId}/manage`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       return data.widget;

@@ -22,13 +22,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { useWidgetsStore } from "@/store/useWidgetsStore";
+import { useChatbotStore } from "@/store/useChatbotStore";
 import { IconSelector } from "@/components/dashboard/IconSelector";
 
 export default function NewWidgetPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createWidget } = useWidgetsStore();
+  const { createWidget } = useChatbotStore();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -87,7 +87,7 @@ export default function NewWidgetPage() {
 
       const widget = await createWidget(widgetData);
 
-      router.push(`/dashboard/widgets/${widget.id}`);
+      router.push(`/dashboard/chatbot/${widget.id}`);
     } catch (error) {
       console.error("Error creating widget:", error);
       toast.error(
@@ -292,7 +292,7 @@ export default function NewWidgetPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => router.push("/dashboard/widgets")}
+                      onClick={() => router.push("/dashboard/chatbot")}
                     >
                       Cancel
                     </Button>

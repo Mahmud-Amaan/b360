@@ -45,9 +45,9 @@ export async function GET() {
             .limit(1);
 
         // Default plan limits
-        const defaultLimits: Record<string, { messages: number; widgets: number }> = {
-            free: { messages: 20, widgets: 1 },
-            pro: { messages: 1000, widgets: 10 }
+        const defaultLimits: Record<string, { messages: number; chatbot: number }> = {
+            free: { messages: 20, chatbot: 1 },
+            pro: { messages: 1000, chatbot: 10 }
         };
 
         // Get user signup date for billing cycle calculation

@@ -6,7 +6,7 @@ export const plans = {
     interval: null,
     limits: {
       messages: 20,
-      widgets: 1,
+      chatbot: 1,
     },
     features: [
       "20 messages per month",
@@ -22,11 +22,11 @@ export const plans = {
     interval: "month",
     limits: {
       messages: 1000,
-      widgets: 10,
+      chatbot: 10,
     },
     features: [
       "1,000 messages per month",
-      "10 widgets",
+      "10 chatbot",
       "Advanced analytics",
       "Priority support",
       "Custom branding",

@@ -10,10 +10,10 @@ export async function proxy(request: NextRequest) {
   }
   // Handle CORS for widget API routes
   const isWidgetAPIRoute =
-    request.nextUrl.pathname.startsWith("/api/widgets/") &&
+    request.nextUrl.pathname.startsWith("/api/chatbot/") &&
     (request.nextUrl.pathname.includes("/status") ||
       request.nextUrl.pathname.includes("/chat") ||
-      request.nextUrl.pathname.endsWith("/widgets"));
+      request.nextUrl.pathname.endsWith("/chatbot"));
 
   if (isWidgetAPIRoute) {
     // Handle preflight OPTIONS request
@@ -68,5 +68,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/widgets/:path*"],
+  matcher: ["/dashboard/:path*", "/api/chatbot/:path*"],
 };

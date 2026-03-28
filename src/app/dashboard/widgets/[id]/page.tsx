@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useWidgetsStore } from "@/store/useWidgetsStore";
+import { useChatbotStore } from "@/store/useChatbotStore";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -43,7 +43,7 @@ export default function WidgetViewPage({
   params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
-  const { widgets, isLoading, fetchWidgets } = useWidgetsStore();
+  const { chatbot, isLoading, fetchChatbot } = useChatbotStore();
 
   const [widgetId, setWidgetId] = useState<string>("");
   const baseUrl = useBaseUrl();
@@ -55,8 +55,8 @@ export default function WidgetViewPage({
   }, [widgetId, baseUrl]);
 
   useEffect(() => {
-    fetchWidgets();
-  }, [fetchWidgets]);
+    fetchChatbot();
+  }, [fetchChatbot]);
 
   useEffect(() => {
     params.then((resolvedParams) => {
@@ -94,7 +94,7 @@ export default function WidgetViewPage({
     );
   }
 
-  const widget = widgets.find((w) => w.id === widgetId);
+  const widget = chatbot.find((w) => w.id === widgetId);
   if (!widget && widgetId) {
     return (
       <div className="max-w-7xl mx-auto py-8">
@@ -106,8 +106,8 @@ export default function WidgetViewPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => router.push("/dashboard/widgets")}>
-              Back to Widgets
+            <Button onClick={() => router.push("/dashboard/chatbot")}>
+              Back to Chatbot
             </Button>
           </CardContent>
         </Card>
@@ -131,8 +131,8 @@ export default function WidgetViewPage({
           <div className="flex items-center space-x-4 mt-3">
             <span
               className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${widget.isActive
-                  ? "bg-green-100 text-green-800"
-                  : "bg-gray-100 text-gray-800"
+                ? "bg-green-100 text-green-800"
+                : "bg-gray-100 text-gray-800"
                 }`}
             >
               {widget.isActive ? "Active" : "Inactive"}
@@ -140,7 +140,7 @@ export default function WidgetViewPage({
           </div>
         </div>
         <div className="flex gap-3 w-full sm:w-auto">
-          <Link href={`/dashboard/widgets/${widget.id}/edit`} className="w-full sm:w-auto">
+          <Link href={`/dashboard/chatbot/${widget.id}/edit`} className="w-full sm:w-auto">
             <Button className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
               <Edit className="mr-2 h-4 w-4" />
               Edit Configuration

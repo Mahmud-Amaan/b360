@@ -24,7 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { useWidgetsStore } from "@/store/useWidgetsStore";
+import { useChatbotStore } from "@/store/useChatbotStore";
 import {
   widgetFormSchema,
   type WidgetFormValues,
@@ -37,7 +37,7 @@ export default function EditWidgetPage({
   params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
-  const { widgets, isLoading, fetchWidgets, updateWidget } = useWidgetsStore();
+  const { chatbot, isLoading, fetchChatbot, updateWidget } = useChatbotStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [widgetId, setWidgetId] = useState<string>("");
   const [iconPreview, setIconPreview] = useState<string | null>(null);
@@ -61,8 +61,8 @@ export default function EditWidgetPage({
   });
 
   useEffect(() => {
-    fetchWidgets();
-  }, [fetchWidgets]);
+    fetchChatbot();
+  }, [fetchChatbot]);
 
   useEffect(() => {
     const getParams = async () => {
@@ -73,8 +73,8 @@ export default function EditWidgetPage({
   }, [params]);
 
   useEffect(() => {
-    if (widgetId && widgets.length > 0) {
-      const widget = widgets.find((w) => w.id === widgetId);
+    if (widgetId && chatbot.length > 0) {
+      const widget = chatbot.find((w) => w.id === widgetId);
       if (widget) {
         form.reset({
           name: widget.name,
@@ -96,7 +96,7 @@ export default function EditWidgetPage({
         }
       }
     }
-  }, [widgets, widgetId, form]);
+  }, [chatbot, widgetId, form]);
 
   const onSubmit = async (data: WidgetFormValues) => {
     if (!widgetId) return;
@@ -123,7 +123,7 @@ export default function EditWidgetPage({
 
       await updateWidget(widgetId, updatedData);
       toast.success("Widget updated successfully");
-      router.push(`/dashboard/widgets/${widgetId}`);
+      router.push(`/dashboard/chatbot/${widgetId}`);
     } catch {
       toast.error("Failed to update widget");
     } finally {
@@ -380,7 +380,7 @@ export default function EditWidgetPage({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => router.push("/dashboard/widgets")}
+                    onClick={() => router.push("/dashboard/chatbot")}
                   >
                     Cancel
                   </Button>

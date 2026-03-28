@@ -8,10 +8,10 @@ export const STRIPE_CONFIG = {
 // Product configuration
 export const PRODUCT_CONFIG = {
   name: "B360 Pro Plan",
-  description: "Professional customer support with AI-powered widgets",
+  description: "Professional customer support with AI-powered chatbot",
   features: [
     "1,000 messages per month",
-    "10 widgets",
+    "10 chatbot",
     "Advanced analytics",
     "Priority support",
     "Custom branding",

@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { trackUsage } from "@/lib/middleware/usage";
 import { ensureUserExists } from "@/lib/user-utils";
 
-// GET - Fetch user's widgets
+// GET - Fetch user's chatbot
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -24,15 +24,15 @@ export async function GET() {
       image: session.user.image || null,
     });
 
-    const userWidgets = await db
+    const userChatbot = await db
       .select()
       .from(widget)
       .where(eq(widget.userId, session.user.id))
       .orderBy(widget.createdAt);
 
-    return NextResponse.json({ widgets: userWidgets });
+    return NextResponse.json({ chatbot: userChatbot });
   } catch (error) {
-    console.error("Error fetching widgets:", error);
+    console.error("Error fetching chatbot:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

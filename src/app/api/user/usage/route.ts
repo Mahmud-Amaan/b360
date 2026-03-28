@@ -30,11 +30,11 @@ export async function GET() {
     const currentPlan = userSubscription[0]?.plan || "free";
 
     // Default plan limits
-    const defaultLimits: Record<string, { messages: number; widgets: number }> =
-      {
-        free: { messages: 20, widgets: 1 },
-        pro: { messages: 1000, widgets: 10 },
-      };
+    const defaultLimits: Record<string, { messages: number; chatbot: number }> =
+    {
+      free: { messages: 20, chatbot: 1 },
+      pro: { messages: 1000, chatbot: 10 },
+    };
 
     const planLimits = defaultLimits[currentPlan] || defaultLimits.free;
 
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, increment = 1 } = body;
 
-    if (!["messages", "widgets"].includes(type)) {
+    if (!["messages", "chatbot"].includes(type)) {
       return NextResponse.json(
         { error: "Invalid usage type" },
         { status: 400 }

@@ -6,8 +6,9 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Users, Database, Shield, Settings, Zap, MessageCircle, Clock } from "lucide-react";
+import { Users, Database, Shield, Settings, Zap, MessageCircle, Clock, Bot, PhoneCall } from "lucide-react";
 import { Header, HeroSection } from "@/components/public/landing";
+import { Footer } from "@/components/public/layout/Footer";
 
 export default function HomePage() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -250,6 +251,67 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* AI Agents Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 font-heading">
+              Next-Gen AI Agents
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Automate your customer interactions across text and voice channels with our intelligent, human-like AI agents. Keep your business running 24/7.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Chatbot Card */}
+            <Card className="border-2 border-purple-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <CardContent className="p-8 lg:p-12 text-center flex flex-col h-full">
+                <div className="w-16 h-16 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-6">
+                  <Bot className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
+                  AI Chatbots
+                </h3>
+                <p className="text-gray-600 mb-6 text-lg flex-grow">
+                  Embed smart, context-aware chatbot widgets on your website to handle customer inquiries instantly, capture leads, and provide 24/7 support.
+                </p>
+                <ul className="text-left space-y-3 mb-8 text-gray-700">
+                  <li className="flex items-center"><Zap className="w-5 h-5 text-purple-500 mr-3 flex-shrink-0" /> Quick and easy embedding</li>
+                  <li className="flex items-center"><Zap className="w-5 h-5 text-purple-500 mr-3 flex-shrink-0" /> Connects to your knowledge base</li>
+                  <li className="flex items-center"><Zap className="w-5 h-5 text-purple-500 mr-3 flex-shrink-0" /> Captures leads and escalates automatically</li>
+                </ul>
+                <Link href="/contact" className="mt-auto">
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-full font-bold">Explore Chatbots</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Voice Agent Card */}
+            <Card className="border-2 border-blue-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <CardContent className="p-8 lg:p-12 text-center flex flex-col h-full">
+                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                  <PhoneCall className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
+                  AI Call Agents
+                </h3>
+                <p className="text-gray-600 mb-6 text-lg flex-grow">
+                  Deploy ultra-realistic, low-latency AI voice agents that can pick up inbound phone calls, book meetings, and handle complex conversations like a human.
+                </p>
+                <ul className="text-left space-y-3 mb-8 text-gray-700">
+                  <li className="flex items-center"><Zap className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" /> Human-like conversational voice</li>
+                  <li className="flex items-center"><Zap className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" /> Instant phone number provisioning</li>
+                  <li className="flex items-center"><Zap className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" /> Books meetings & triggers workflows</li>
+                </ul>
+                <Link href="/contact" className="mt-auto">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold">Explore Voice Agents</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Services Section */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -356,128 +418,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
-        <div className="container mx-auto px-4">
-          {/* Footer Links */}
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
-            {/* Solutions */}
-            <div>
-              <h4 className="font-bold text-white mb-4 font-heading">
-                Services
-              </h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="/customer-support/general"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    General Support
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/customer-support/technical"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Technical Support
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/customer-support/call-center"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Call Center
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/customer-support/live-chat"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Live Chat
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h4 className="font-bold text-white mb-4 font-heading">
-                Company
-              </h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link
-                    href="/about"
-                    className="hover:text-white transition-colors"
-                  >
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact"
-                    className="hover:text-white transition-colors"
-                  >
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/pricing"
-                    className="hover:text-white transition-colors"
-                  >
-                    Pricing
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h4 className="font-bold text-white mb-4 font-heading">
-                Contact
-              </h4>
-              <div className="text-gray-400">
-                <p>401 N Michigan Ave</p>
-                <p>Chicago, IL 60611</p>
-                <p className="mt-4">
-                  <Link
-                    href="/contact"
-                    className="text-emerald-400 hover:text-emerald-300 transition-colors"
-                  >
-                    Get in Touch →
-                  </Link>
-                </p>
-              </div>
-            </div>
-
-            {/* Company Info */}
-            <div>
-              <div className="flex items-center space-x-2 mb-6">
-                <div className="w-8 h-8 bg-gradient-emerald-indigo rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">B</span>
-                </div>
-                <span className="text-2xl font-bold text-white font-heading">
-                  B360
-                </span>
-              </div>
-              <p className="text-gray-400">
-                Expert customer support coverage with strategic hubs across four
-                continents.
-              </p>
-            </div>
-          </div>
-
-          {/* Bottom Section */}
-          <div className="border-t border-gray-800 pt-8">
-            <div className="flex flex-col lg:flex-row justify-between items-center text-gray-400 text-sm">
-              <p>© 2025 B360. All Rights Reserved</p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -43,8 +43,8 @@ export async function GET() {
         )
       );
 
-    // Get active widgets count
-    const [activeWidgets] = await db
+    // Get active chatbot count
+    const [activeChatbot] = await db
       .select({ count: count() })
       .from(widget)
       .where(and(eq(widget.userId, userId), eq(widget.isActive, true)));
@@ -62,9 +62,9 @@ export async function GET() {
         used: usageRecord?.messageCount || 0,
         limit: planLimits.messages,
       },
-      widgets: {
-        used: activeWidgets.count || 0,
-        limit: planLimits.widgets,
+      chatbot: {
+        used: activeChatbot.count || 0,
+        limit: planLimits.chatbot,
       },
       plan,
     };

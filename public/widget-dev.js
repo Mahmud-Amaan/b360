@@ -811,7 +811,7 @@ class ModernSupportWidget {
 
   async loadWidgetConfig() {
     try {
-      const apiUrl = `${API_BASE}/api/widgets/${this.config.widgetId}`;
+      const apiUrl = `${API_BASE}/api/chatbot/${this.config.widgetId}`;
       const response = await fetch(apiUrl);
 
       if (response.ok) {
@@ -851,7 +851,7 @@ class ModernSupportWidget {
 
   async sendChatMessage(message) {
     try {
-      const apiUrl = `${API_BASE}/api/widgets/${this.config.widgetId}/chat`;
+      const apiUrl = `${API_BASE}/api/chatbot/${this.config.widgetId}/chat`;
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -890,7 +890,7 @@ class ModernSupportWidget {
       const widgetId = script.getAttribute('data-widget-id');
       if (widgetId) {
         // Only show widget if status API returns isActive true and 2xx
-        fetch(`${API_BASE}/api/widgets/${widgetId}/status`)
+        fetch(`${API_BASE}/api/chatbot/${widgetId}/status`)
           .then(response => {
             if (!response.ok) {
               return null;

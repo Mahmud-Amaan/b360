@@ -237,7 +237,7 @@ export async function getUserUsage() {
     widgetCount: usage?.widgetCount || 0,
     limits: {
       messages: planConfig.limits.messages,
-      widgets: planConfig.limits.widgets,
+      chatbot: planConfig.limits.chatbot,
     },
     resetDate: periodEnd,
   };
