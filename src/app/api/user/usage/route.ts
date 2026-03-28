@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { subscription, subscriptionUsage, widget } from "@/db/schema";
+import { subscription, subscriptionUsage, chatbot } from "@/db/schema";
 import { eq, and, count } from "drizzle-orm";
 
 export async function GET() {
@@ -30,10 +30,10 @@ export async function GET() {
     const currentPlan = userSubscription[0]?.plan || "free";
 
     // Default plan limits
-    const defaultLimits: Record<string, { messages: number; chatbot: number }> =
+    const defaultLimits: Record<string, { messages: number; chatbots: number }> =
     {
-      free: { messages: 20, chatbot: 1 },
-      pro: { messages: 1000, chatbot: 10 },
+      free: { messages: 20, chatbots: 1 },
+      pro: { messages: 1000, chatbots: 10 },
     };
 
     const planLimits = defaultLimits[currentPlan] || defaultLimits.free;
@@ -50,13 +50,13 @@ export async function GET() {
       )
       .limit(1);
 
-    // Get actual widget count
-    const widgetCountResult = await db
+    // Get actual chatbot count
+    const chatbotCountResult = await db
       .select({ count: count() })
-      .from(widget)
-      .where(eq(widget.userId, userId));
+      .from(chatbot)
+      .where(eq(chatbot.userId, userId));
 
-    const actualWidgetCount = widgetCountResult[0]?.count || 0;
+    const actualChatbotCount = chatbotCountResult[0]?.count || 0;
 
     // // Get messages count from analytics for current month
     // const startOfMonth = new Date(
@@ -73,10 +73,10 @@ export async function GET() {
     // const messageAnalytics = await db
     //     .select({ count: count() })
     //     .from(analytics)
-    //     .innerJoin(widget, eq(analytics.widgetId, widget.id))
+    //     .innerJoin(chatbot, eq(analytics.chatbotId, chatbot.id))
     //     .where(
     //         and(
-    //             eq(widget.userId, userId),
+    //             eq(chatbot.userId, userId),
     //             eq(analytics.eventType, 'message_sent'),
     //             sql`${analytics.createdAt} >= ${startOfMonth}`,
     //             sql`${analytics.createdAt} <= ${endOfMonth}`
@@ -92,7 +92,7 @@ export async function GET() {
         .update(subscriptionUsage)
         .set({
           messageCount: actualMessageCount,
-          widgetCount: actualWidgetCount,
+          chatbotCount: actualChatbotCount,
           updatedAt: new Date(),
         })
         .where(eq(subscriptionUsage.id, usageRecord[0].id));
@@ -102,7 +102,7 @@ export async function GET() {
         userId,
         period: currentPeriod,
         messageCount: actualMessageCount,
-        widgetCount: actualWidgetCount,
+        chatbotCount: actualChatbotCount,
       });
     }
 
@@ -116,7 +116,7 @@ export async function GET() {
     const response = {
       usage: {
         messageCount: actualMessageCount,
-        widgetCount: actualWidgetCount,
+        chatbotCount: actualChatbotCount,
         period: currentPeriod,
         limits: planLimits,
         resetDate,
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, increment = 1 } = body;
 
-    if (!["messages", "chatbot"].includes(type)) {
+    if (!["messages", "chatbots"].includes(type)) {
       return NextResponse.json(
         { error: "Invalid usage type" },
         { status: 400 }
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
         userId,
         period: currentPeriod,
         messageCount: 0,
-        widgetCount: 0,
+        chatbotCount: 0,
       });
 
       usageRecord = await db
@@ -190,11 +190,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Update the appropriate counter
-    const updateField = type === "messages" ? "messageCount" : "widgetCount";
+    const updateField = type === "messages" ? "messageCount" : "chatbotCount";
     const currentValue =
       type === "messages"
         ? usageRecord[0].messageCount
-        : usageRecord[0].widgetCount;
+        : usageRecord[0].chatbotCount;
 
     await db
       .update(subscriptionUsage)

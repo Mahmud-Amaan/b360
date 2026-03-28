@@ -33,6 +33,7 @@ export default function RootLayout({
         className={`${inter.variable} ${poppins.variable} font-inter antialiased`}
       >
         <Providers>{children}</Providers>
+        <script src="http://localhost:3000/chatbot-dev.js" data-chatbot-id="94bdfa37-bcb2-4988-80c3-ae5675010610" defer></script>
       </body>
     </html>
   );

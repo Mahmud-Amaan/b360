@@ -8,11 +8,11 @@ export const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-export const AI_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct";
+export const AI_MODEL = "llama3-70b-8192";
 
-// Define the widget type based on your database schema
+// Define the chatbot type based on your database schema
 // Note: Nullable fields in the database return null, not undefined
-type WidgetData = {
+type ChatbotData = {
   id: string;
   userId: string;
   name: string;
@@ -20,7 +20,7 @@ type WidgetData = {
   primaryColor: string;
   productName: string;
   description: string;
-  widgetTitle: string;
+  chatbotTitle: string;
   welcomeMessage: string;
   isActive: boolean;
   createdAt: Date;
@@ -29,30 +29,28 @@ type WidgetData = {
 
 export async function generateAIResponse(
   message: string,
-  widgetData: WidgetData
+  chatbotData: ChatbotData
 ) {
   try {
-    // Build context from widget data
+    // Build context from chatbot data
     let context = "";
 
-    if (widgetData.productName) {
-      context += `Product: ${widgetData.productName}\n`;
+    if (chatbotData.productName) {
+      context += `Product: ${chatbotData.productName}\n`;
     }
 
-    if (widgetData.description) {
-      context += `Product Description: ${widgetData.description}\n`;
+    if (chatbotData.description) {
+      context += `Product Description: ${chatbotData.description}\n`;
     }
 
-    const systemPrompt = `You are a helpful AI assistant for ${
-      widgetData.productName || "this product"
-    }'s customer support widget.
+    const systemPrompt = `You are a helpful AI assistant for ${chatbotData.productName || "this product"
+      }'s customer support chatbot.
 You should provide helpful, accurate, and friendly responses to customer inquiries.
 
-${
-  context
-    ? `Here is important information about the product/service:\n${context}`
-    : ""
-}
+${context
+        ? `Here is important information about the product/service:\n${context}`
+        : ""
+      }
 
 Guidelines:
 - Be helpful and professional

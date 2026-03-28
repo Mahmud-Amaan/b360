@@ -30,7 +30,7 @@ export function IconSelector({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const popularEmojis = [
-    "💬", "🎧", "👋", "🤖", "💡", "⚡", "🚀", "💼", 
+    "💬", "🎧", "👋", "🤖", "💡", "⚡", "🚀", "💼",
     "📞", "✉️", "❓", "💭", "🔔", "⭐", "👍", "❤️"
   ];
 
@@ -79,10 +79,10 @@ export function IconSelector({
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <Label className="text-base font-semibold">Widget Icon</Label>
-        
-        <RadioGroup 
-          value={iconType} 
+        <Label className="text-base font-semibold">Chatbot Icon</Label>
+
+        <RadioGroup
+          value={iconType}
           onValueChange={(value) => onIconTypeChange(value as "default" | "emoji" | "image")}
           className="space-y-4"
         >
@@ -140,15 +140,14 @@ export function IconSelector({
                 key={emoji}
                 type="button"
                 onClick={() => onEmojiChange(emoji)}
-                className={`w-10 h-10 text-xl rounded-lg border-2 hover:border-blue-300 transition-colors ${
-                  iconEmoji === emoji ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
-                }`}
+                className={`w-10 h-10 text-xl rounded-lg border-2 hover:border-blue-300 transition-colors ${iconEmoji === emoji ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                  }`}
               >
                 {emoji}
               </button>
             ))}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="custom-emoji" className="text-sm">Or enter custom emoji:</Label>
             <Input
@@ -167,15 +166,15 @@ export function IconSelector({
       {iconType === "image" && (
         <div className="space-y-3">
           <Label className="text-sm font-medium">Upload Icon</Label>
-          
+
           {customIcon ? (
             <div className="space-y-3">
               <div className="flex items-center space-x-3 p-3 border rounded-lg bg-green-50">
-                <Image 
-                  src={customIcon} 
-                  alt="Custom icon" 
-                  width={32} 
-                  height={32} 
+                <Image
+                  src={customIcon}
+                  alt="Custom icon"
+                  width={32}
+                  height={32}
                   className="rounded"
                 />
                 <div className="flex-1">
@@ -198,7 +197,7 @@ export function IconSelector({
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                 <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
                 <p className="text-sm text-gray-600 mb-3">
-                  Upload an icon for your chat widget
+                  Upload an icon for your chat chatbot
                 </p>
                 <p className="text-xs text-gray-500 mb-4">
                   Recommended: 32x32px, PNG/JPG/SVG, max 2MB
@@ -214,7 +213,7 @@ export function IconSelector({
               </div>
             </div>
           )}
-          
+
           <input
             ref={fileInputRef}
             type="file"

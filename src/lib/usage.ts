@@ -2,8 +2,8 @@ import { db } from "@/lib/db";
 import {
   subscriptionUsage,
   subscription,
-  widget,
-  widgetAnalytics,
+  chatbot,
+  chatbotAnalytics,
   user,
 } from "@/db/schema";
 import { eq, and, count, sql } from "drizzle-orm";
@@ -12,12 +12,12 @@ import { getBillingPeriodKey } from "@/lib/billing";
 
 export interface PlanLimits {
   messages: number;
-  chatbot: number;
+  chatbots: number;
 }
 
 export const PLAN_LIMITS: Record<string, PlanLimits> = {
-  free: { messages: 20, chatbot: 1 },
-  pro: { messages: 1000, chatbot: 10 },
+  free: { messages: 20, chatbots: 1 },
+  pro: { messages: 1000, chatbots: 10 },
 };
 
 export class UsageService {
@@ -102,7 +102,7 @@ export class UsageService {
           userId,
           period: currentPeriod,
           messageCount: 0,
-          widgetCount: 0,
+          chatbotCount: 0,
         });
       } catch (error) {
         console.error(`Error creating usage record for user ${userId}:`, error);
@@ -116,7 +116,7 @@ export class UsageService {
    */
   static async incrementMessageUsage(
     userId: string,
-    widgetId: string,
+    chatbotId: string,
     count: number = 1
   ): Promise<boolean> {
     const currentPeriod = await this.getCurrentPeriod(userId);
@@ -137,24 +137,24 @@ export class UsageService {
           )
         );
 
-      // Update widget analytics
-      const existingWidgetAnalytics = await db
+      // Update chatbot analytics
+      const existingChatbotAnalytics = await db
         .select()
-        .from(widgetAnalytics)
-        .where(eq(widgetAnalytics.widgetId, widgetId))
+        .from(chatbotAnalytics)
+        .where(eq(chatbotAnalytics.chatbotId, chatbotId))
         .limit(1);
 
-      if (existingWidgetAnalytics.length > 0) {
+      if (existingChatbotAnalytics.length > 0) {
         await db
-          .update(widgetAnalytics)
+          .update(chatbotAnalytics)
           .set({
-            messageCount: sql`${widgetAnalytics.messageCount} + ${count}`,
+            messageCount: sql`${chatbotAnalytics.messageCount} + ${count}`,
             updatedAt: new Date(),
           })
-          .where(eq(widgetAnalytics.widgetId, widgetId));
+          .where(eq(chatbotAnalytics.chatbotId, chatbotId));
       } else {
-        await db.insert(widgetAnalytics).values({
-          widgetId,
+        await db.insert(chatbotAnalytics).values({
+          chatbotId,
           messageCount: count,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -169,26 +169,26 @@ export class UsageService {
   }
 
   /**
-   * Sync widget count with actual widget count
+   * Sync chatbot count with actual chatbot count
    */
-  static async syncWidgetCount(userId: string): Promise<boolean> {
+  static async syncChatbotCount(userId: string): Promise<boolean> {
     const currentPeriod = await this.getCurrentPeriod(userId);
     await this.initializeUsageRecord(userId, currentPeriod);
 
     try {
-      // Get actual widget count
-      const widgetCountResult = await db
+      // Get actual chatbot count
+      const chatbotCountResult = await db
         .select({ count: count() })
-        .from(widget)
-        .where(eq(widget.userId, userId));
+        .from(chatbot)
+        .where(eq(chatbot.userId, userId));
 
-      const actualWidgetCount = widgetCountResult[0]?.count || 0;
+      const actualChatbotCount = chatbotCountResult[0]?.count || 0;
 
       // Update usage record
       await db
         .update(subscriptionUsage)
         .set({
-          widgetCount: actualWidgetCount,
+          chatbotCount: actualChatbotCount,
           updatedAt: new Date(),
         })
         .where(
@@ -200,7 +200,7 @@ export class UsageService {
 
       return true;
     } catch (error) {
-      console.error("Error syncing widget count:", error);
+      console.error("Error syncing chatbot count:", error);
       return false;
     }
   }
@@ -210,7 +210,7 @@ export class UsageService {
    */
   static async canPerformAction(
     userId: string,
-    action: "message" | "widget"
+    action: "message" | "chatbot"
   ): Promise<boolean> {
     console.log(userId, action);
     const currentPeriod = await this.getCurrentPeriod(userId);
@@ -237,8 +237,8 @@ export class UsageService {
     switch (action) {
       case "message":
         return usage.messageCount < limits.messages;
-      case "widget":
-        return usage.widgetCount < limits.chatbot;
+      case "chatbot":
+        return usage.chatbotCount < limits.chatbots;
       default:
         return false;
     }
@@ -254,8 +254,8 @@ export class UsageService {
 
     await this.initializeUsageRecord(userId, currentPeriod);
 
-    // Sync widget count to ensure accuracy
-    await this.syncWidgetCount(userId);
+    // Sync chatbot count to ensure accuracy
+    await this.syncChatbotCount(userId);
 
     // Get updated usage record after sync
     const updatedUsageRecord = await db
@@ -271,7 +271,7 @@ export class UsageService {
 
     const usage = updatedUsageRecord[0] || {
       messageCount: 0,
-      widgetCount: 0,
+      chatbotCount: 0,
       period: currentPeriod,
     };
 
@@ -281,17 +281,17 @@ export class UsageService {
 
     return {
       messageCount: usage.messageCount,
-      widgetCount: usage.widgetCount,
+      chatbotCount: usage.chatbotCount,
       period: currentPeriod,
       limits,
       resetDate,
       canSendMessage: usage.messageCount < limits.messages,
-      canCreateWidget: usage.widgetCount < limits.chatbot,
+      canCreateChatbot: usage.chatbotCount < limits.chatbots,
       remainingMessages: Math.max(0, limits.messages - usage.messageCount),
-      remainingChatbot: Math.max(0, limits.chatbot - usage.widgetCount),
+      remainingChatbots: Math.max(0, limits.chatbots - usage.chatbotCount),
       usagePercentage: {
         messages: Math.min(100, (usage.messageCount / limits.messages) * 100),
-        chatbot: Math.min(100, (usage.widgetCount / limits.chatbot) * 100),
+        chatbots: Math.min(100, (usage.chatbotCount / limits.chatbots) * 100),
       },
     };
   }
@@ -327,7 +327,7 @@ export class UsageService {
     return usageHistory.map((record) => ({
       period: record.period,
       messageCount: record.messageCount,
-      widgetCount: record.widgetCount,
+      chatbotCount: record.chatbotCount,
       updatedAt: record.updatedAt,
     }));
   }

@@ -12,7 +12,7 @@ interface UsageData {
     used: number;
     limit: number;
   };
-  chatbot: {
+  chatbots: {
     used: number;
     limit: number;
   };
@@ -40,7 +40,7 @@ export function UsageTracker() {
       // Set default empty usage on error
       setUsage({
         messages: { used: 0, limit: plans.free.limits.messages },
-        chatbot: { used: 0, limit: plans.free.limits.chatbot },
+        chatbots: { used: 0, limit: plans.free.limits.chatbots },
         plan: "free",
       });
     } finally {
@@ -89,9 +89,9 @@ export function UsageTracker() {
     usage.messages.used,
     usage.messages.limit
   );
-  const chatbotPercentage = getUsagePercentage(
-    usage.chatbot.used,
-    usage.chatbot.limit
+  const chatbotsPercentage = getUsagePercentage(
+    usage.chatbots.used,
+    usage.chatbots.limit
   );
 
   return (
@@ -128,29 +128,29 @@ export function UsageTracker() {
           </p>
         </div>
 
-        {/* Chatbot Usage */}
+        {/* Chatbots Usage */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-purple-500" />
-              <span className="font-medium">Chatbot</span>
+              <span className="font-medium">Chatbots</span>
             </div>
             <span
               className={`text-sm font-medium ${getUsageColor(
-                chatbotPercentage
+                chatbotsPercentage
               )}`}
             >
-              {usage.chatbot.used} / {usage.chatbot.limit}
+              {usage.chatbots.used} / {usage.chatbots.limit}
             </span>
           </div>
-          <Progress value={chatbotPercentage} className="h-2" />
+          <Progress value={chatbotsPercentage} className="h-2" />
           <p className="text-xs text-gray-500">
-            {usage.chatbot.limit - usage.chatbot.used} chatbot available
+            {usage.chatbots.limit - usage.chatbots.used} chatbots available
           </p>
         </div>
 
         {/* Usage Warnings */}
-        {(messagesPercentage >= 75 || chatbotPercentage >= 75) && (
+        {(messagesPercentage >= 75 || chatbotsPercentage >= 75) && (
           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-start gap-2">
               <TrendingUp className="w-4 h-4 text-yellow-600 mt-0.5" />
@@ -173,7 +173,7 @@ export function UsageTracker() {
               <div className="text-sm">
                 <p className="font-medium text-blue-800">Upgrade Suggestion</p>
                 <p className="text-blue-700">
-                  Upgrade to Pro for 1,000 messages/month and 10 chatbot for
+                  Upgrade to Pro for 1,000 messages/month and 10 chatbots for
                   just $9/month.
                 </p>
               </div>
@@ -189,7 +189,7 @@ export function UsageTracker() {
               <p className="font-medium text-gray-600">Free Plan</p>
               <div className="space-y-1 text-gray-500">
                 <p>• {plans.free.limits.messages} messages/month</p>
-                <p>• {plans.free.limits.chatbot} widget</p>
+                <p>• {plans.free.limits.chatbots} chatbot</p>
                 <p>• Basic analytics</p>
               </div>
             </div>
@@ -197,7 +197,7 @@ export function UsageTracker() {
               <p className="font-medium text-gray-600">Pro Plan</p>
               <div className="space-y-1 text-gray-500">
                 <p>• {plans.pro.limits.messages} messages/month</p>
-                <p>• {plans.pro.limits.chatbot} chatbot</p>
+                <p>• {plans.pro.limits.chatbots} chatbots</p>
                 <p>• Advanced analytics</p>
                 <p>• Priority support</p>
               </div>

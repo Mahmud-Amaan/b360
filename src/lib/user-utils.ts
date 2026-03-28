@@ -69,7 +69,7 @@ export async function userExists(userId: string): Promise<boolean> {
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
-import { widget, subscriptionUsage, agent } from "@/db/schema";
+import { chatbot, subscriptionUsage, agent } from "@/db/schema";
 import { getCurrentBillingPeriod } from "@/lib/billing";
 
 export async function getDashboardAnalytics() {
@@ -104,10 +104,10 @@ export async function getDashboardAnalytics() {
         )
       );
 
-    const [activeChatbot] = await db
+    const [activeChatbots] = await db
       .select({ count: count() })
-      .from(widget)
-      .where(and(eq(widget.userId, userId), eq(widget.isActive, true)));
+      .from(chatbot)
+      .where(and(eq(chatbot.userId, userId), eq(chatbot.isActive, true)));
 
     const [activeCallAgents] = await db
       .select({ count: count() })
@@ -117,7 +117,7 @@ export async function getDashboardAnalytics() {
     return {
       stats: {
         totalMessages: totalMessages?.messageCount || 0,
-        activeChatbot: activeChatbot.count || 0,
+        activeChatbots: activeChatbots.count || 0,
         activeCallAgents: activeCallAgents.count || 0,
       },
     };

@@ -17,7 +17,7 @@ export default function AiPricingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
-    const handleSubscribe = async (planType: "pro" | "free") => {
+  const handleSubscribe = async (planType: "pro" | "free") => {
     if (!session) {
       router.push("/signin");
       return;
@@ -48,7 +48,7 @@ export default function AiPricingPage() {
     }
   };
 
-    const pricingPlans = [
+  const pricingPlans = [
     {
       name: "Free Plan",
       price: "$0",
@@ -58,7 +58,7 @@ export default function AiPricingPage() {
       icon: <Check className="w-8 h-8" />,
       features: [
         "20 AI messages per month",
-        "1 chat widget",
+        "1 chat chatbot",
         "Basic analytics",
         "Email support",
         "Standard AI responses"
@@ -116,7 +116,7 @@ export default function AiPricingPage() {
     <PageLayout
       title="AI-Powered Support Pricing"
       subtitle="Unlock the power of AI to elevate your customer experience."
-      description="Our AI plan is designed to help you automate and optimize your support channels." 
+      description="Our AI plan is designed to help you automate and optimize your support channels."
       heroGradient="from-emerald-50 to-indigo-50"
       ctaTitle="Ready to get started?"
       ctaDescription="Contact us for a custom quote or to discuss your specific requirements."
@@ -125,7 +125,7 @@ export default function AiPricingPage() {
       {/* Pricing Cards */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-                    <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {pricingPlans.map((plan, index) => (
               <motion.div
                 key={index}
@@ -134,11 +134,10 @@ export default function AiPricingPage() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
                 <Card
-                  className={`relative border-2 hover:shadow-xl transition-all duration-300 h-full ${
-                    plan.popular
+                  className={`relative border-2 hover:shadow-xl transition-all duration-300 h-full ${plan.popular
                       ? "border-indigo-200 shadow-lg scale-105"
                       : "border-gray-200 hover:border-blue-200"
-                  }`}
+                    }`}
                 >
                   {plan.popular && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -193,11 +192,10 @@ export default function AiPricingPage() {
                       <Button
                         onClick={() => handleSubscribe(plan.planType)}
                         disabled={loading === plan.planType}
-                        className={`w-full py-3 font-bold rounded-full ${
-                          plan.popular
+                        className={`w-full py-3 font-bold rounded-full ${plan.popular
                             ? "bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
                             : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
-                        }`}
+                          }`}
                       >
                         {loading === plan.planType ? (
                           <>

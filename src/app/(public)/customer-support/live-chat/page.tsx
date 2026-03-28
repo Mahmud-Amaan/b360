@@ -24,7 +24,7 @@ export default function LiveChatSupportPage() {
     {
       icon: <Bot className="w-8 h-8" />,
       title: "AI-Powered Chat",
-      description: "Intelligent chatbots with human agent escalation for complex issues.",
+      description: "Intelligent chatbotss with human agent escalation for complex issues.",
       gradient: "from-blue-500 to-indigo-600",
     },
     {
@@ -79,7 +79,7 @@ export default function LiveChatSupportPage() {
     {
       icon: <Monitor className="w-8 h-8" />,
       title: "Website Chat",
-      description: "Embedded chat widget for your website",
+      description: "Embedded chat chatbot for your website",
     },
     {
       icon: <Smartphone className="w-8 h-8" />,

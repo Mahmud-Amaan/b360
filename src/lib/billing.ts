@@ -218,7 +218,7 @@ export async function getUserUsage() {
   const [usage] = await db
     .select({
       messageCount: usageTable.messageCount,
-      widgetCount: usageTable.widgetCount,
+      chatbotCount: usageTable.chatbotCount,
     })
     .from(usageTable)
     .where(
@@ -234,10 +234,10 @@ export async function getUserUsage() {
 
   return {
     messageCount: usage?.messageCount || 0,
-    widgetCount: usage?.widgetCount || 0,
+    chatbotCount: usage?.chatbotCount || 0,
     limits: {
       messages: planConfig.limits.messages,
-      chatbot: planConfig.limits.chatbot,
+      chatbots: planConfig.limits.chatbots,
     },
     resetDate: periodEnd,
   };

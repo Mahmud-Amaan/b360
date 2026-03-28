@@ -8,7 +8,7 @@ const nextConfig = {
         headers: [
           {
             key: "Access-Control-Allow-Origin",
-            value: "*", // Allow all origins for widget embedding
+            value: "*", // Allow all origins for chatbot embedding
           },
           {
             key: "Access-Control-Allow-Methods",
@@ -25,8 +25,8 @@ const nextConfig = {
         ],
       },
       {
-        // Apply CORS headers to widget.js
-        source: "/widget.js",
+        // Apply CORS headers to chatbot.js
+        source: "/chatbot.js",
         headers: [
           {
             key: "Access-Control-Allow-Origin",

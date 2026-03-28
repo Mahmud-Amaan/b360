@@ -2,107 +2,114 @@
 
 import { PageLayout } from "@/components/public/layout/PageLayout";
 import { ContentSection } from "@/components/public/layout/ContentSection";
-import { Scale, Calendar, Phone, FileText, Users, Shield } from "lucide-react";
+import {
+  Scale,
+  ClipboardList,
+  Calendar,
+  PhoneCall,
+  MessageSquare,
+  ShieldCheck,
+} from "lucide-react";
 
 export default function LawFirmsPage() {
   const features = [
     {
-      title: "Client Intake & Screening",
+      title: "Client Intake Automation",
       description:
-        "Professional client intake processes, initial case screening, and qualification to ensure efficient attorney time allocation.",
-      icon: <Users className="w-12 h-12" />,
+        "Seamlessly capture new client details, case types, and urgency levels instantly via 24/7 AI voice and chat agents.",
+      icon: <ClipboardList className="w-12 h-12" />,
     },
     {
-      title: "Appointment Scheduling",
+      title: "Case Qualification",
       description:
-        "Seamless coordination of consultations, court dates, and client meetings with calendar integration and reminders.",
+        "Intelligently vet inbound leads using pre-defined questions to ensure attorneys only spend time on qualified cases.",
+      icon: <Scale className="w-12 h-12" />,
+    },
+    {
+      title: "Appointment Booking",
+      description:
+        "Automatically schedule initial consultations between qualified prospects and available attorneys.",
       icon: <Calendar className="w-12 h-12" />,
     },
     {
-      title: "Confidential Communication",
+      title: "Non-Legal FAQs",
       description:
-        "Secure, HIPAA-compliant communication handling with strict confidentiality protocols for sensitive legal matters.",
-      icon: <Shield className="w-12 h-12" />,
+        "Easily handle common inquiries regarding office hours, billing procedures, location, and required documentation.",
+      icon: <MessageSquare className="w-12 h-12" />,
     },
     {
-      title: "Case Status Updates",
+      title: "Secure & Confidential",
       description:
-        "Regular client communication regarding case progress, court dates, and important legal developments.",
-      icon: <FileText className="w-12 h-12" />,
+        "Maintain attorney-client privilege and strict data privacy with our secure AI infrastructure.",
+      icon: <ShieldCheck className="w-12 h-12" />,
     },
     {
-      title: "Emergency Response",
+      title: "After-Hours Answering",
       description:
-        "24/7 emergency contact service for urgent legal matters requiring immediate attorney attention.",
-      icon: <Phone className="w-12 h-12" />,
-    },
-    {
-      title: "Legal Consultation Support",
-      description:
-        "Professional support for initial consultations, document collection, and pre-meeting preparation.",
-      icon: <Scale className="w-12 h-12" />,
+        "Never miss an emergency call for criminal defense or personal injury cases that come in late at night.",
+      icon: <PhoneCall className="w-12 h-12" />,
     },
   ];
 
   const benefits = [
     {
-      title: "Client Acquisition",
+      title: "Increased Caseload",
       description:
-        "Professional intake processes and immediate response significantly improve client acquisition rates.",
-      metric: "50% Higher",
+        "Capture every late-night emergency call and convert them into scheduled consultations before competitors do.",
+      metric: "+25% Retainers",
     },
     {
-      title: "Attorney Efficiency",
+      title: "Attorney Time Saved",
       description:
-        "Support team handles routine inquiries, allowing attorneys to focus on billable hours and case work.",
-      metric: "40% More Efficient",
+        "Stop wasting billable hours on unqualified leads. AI filters the noise and delivers only viable cases.",
+      metric: "15 Hrs/Week",
     },
     {
-      title: "Client Satisfaction",
+      title: "Professional Image",
       description:
-        "Consistent communication and professional service delivery leads to higher client satisfaction and referrals.",
-      metric: "98% Satisfaction",
+        "Ensure every single caller receives a polite, articulate, and immediate response, enhancing your firm's reputation.",
+      metric: "Zero Hold Time",
     },
     {
-      title: "Response Time",
+      title: "Lower Overhead",
       description:
-        "Immediate response to client inquiries ensures no potential cases are lost due to delayed communication.",
-      metric: "< 1 hour",
+        "Reduce the need for a massive reception staff or an expensive after-hours answering service.",
+      metric: "-40% Costs",
     },
   ];
 
   const stats = [
-    { value: "24/7", label: "Emergency Support" },
-    { value: "50%", label: "Client Acquisition Boost" },
-    { value: "< 1 hour", label: "Response Time" },
-    { value: "98%", label: "Client Satisfaction" },
+    { value: "+25%", label: "More Retainers" },
+    { value: "15 hrs", label: "Saved per Attorney" },
+    { value: "24/7", label: "Intake Availability" },
+    { value: "0", label: "Missed Emergency Calls" },
   ];
 
   const testimonial = {
     quote:
-      "B360's legal support team has transformed our client intake process. They handle initial consultations professionally and ensure we never miss a potential case. Our client acquisition has increased by 50% while maintaining the highest standards of confidentiality.",
-    author: "David Thompson",
-    company: "Thompson & Associates Law Firm",
+      "For a personal injury firm, missing a phone call on a weekend means losing a multimillion-dollar case. Since deploying B360's voice agents, we instantly intake emergency cases 24/7. It paid for itself in the first week.",
+    author: "Robert T., Managing Partner",
+    company: "Tate & Associates Law",
   };
 
   return (
     <PageLayout
-      title="Law Firm Customer Support"
-      subtitle="Specialized support for legal professionals"
-      description="Comprehensive customer support services designed specifically for law firms, attorneys, and legal practices to enhance client acquisition, improve efficiency, and maintain professional standards."
-      heroGradient="from-indigo-50 to-emerald-50"
-      ctaTitle="Ready to enhance your legal practice?"
-      ctaDescription="Let our legal support specialists help you improve client acquisition, streamline operations, and deliver exceptional legal services."
+      title="Legal Firms & Attorneys AI"
+      subtitle="Automate client intake and case qualification with secure AI agents"
+      description="Deploy intelligent voice and chat agents to act as your firm's 24/7 receptionist. Let AI qualify leads and schedule consultations so your attorneys can focus on winning cases."
+      heroGradient="from-slate-50 to-gray-200"
+      ctaTitle="Ready to capture more qualified legal cases?"
+      ctaDescription="Let our secure AI voice agents handle your client intake and eliminate the unqualified leads draining your billable hours."
     >
       <ContentSection
-        title="Complete Legal Support Solutions"
-        description="Our specialized legal support services are designed to handle client communications, intake processes, and administrative tasks while maintaining the highest standards of confidentiality and professionalism."
+        title="Complete Legal Intake Automation"
+        description="Specifically designed for law firms looking to scale their client acquisition without inflating administrative overhead."
         features={features}
         className="bg-white"
       />
 
       <ContentSection
-        title="Legal Practice Excellence Metrics"
+        title="Firm Impact & ROI"
         stats={stats}
         benefits={benefits}
         className="bg-gray-50"

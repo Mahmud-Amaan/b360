@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const result = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          folder: "widget-icons",
+          folder: "chatbot-icons",
           resource_type: "image",
           transformation: [
             { width: 64, height: 64, crop: "fill" },

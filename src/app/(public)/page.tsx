@@ -150,7 +150,7 @@ export default function HomePage() {
                       <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500" />
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col items-center">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-emerald-indigo rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm">
                       LAUNCH
@@ -241,9 +241,8 @@ export default function HomePage() {
                 <button
                   key={i}
                   onClick={() => setCurrentTestimonial(i)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    i === currentTestimonial ? "bg-emerald-400" : "bg-gray-300"
-                  }`}
+                  className={`w-3 h-3 rounded-full transition-colors ${i === currentTestimonial ? "bg-emerald-400" : "bg-gray-300"
+                    }`}
                 />
               ))}
             </div>
@@ -263,17 +262,17 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Chatbot Card */}
+            {/* Chatbots Card */}
             <Card className="border-2 border-purple-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <CardContent className="p-8 lg:p-12 text-center flex flex-col h-full">
                 <div className="w-16 h-16 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-6">
                   <Bot className="w-8 h-8 text-purple-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-                  AI Chatbots
+                  AI Chatbotss
                 </h3>
                 <p className="text-gray-600 mb-6 text-lg flex-grow">
-                  Embed smart, context-aware chatbot widgets on your website to handle customer inquiries instantly, capture leads, and provide 24/7 support.
+                  Embed smart, context-aware chatbots chatbots on your website to handle customer inquiries instantly, capture leads, and provide 24/7 support.
                 </p>
                 <ul className="text-left space-y-3 mb-8 text-gray-700">
                   <li className="flex items-center"><Zap className="w-5 h-5 text-purple-500 mr-3 flex-shrink-0" /> Quick and easy embedding</li>
@@ -281,7 +280,7 @@ export default function HomePage() {
                   <li className="flex items-center"><Zap className="w-5 h-5 text-purple-500 mr-3 flex-shrink-0" /> Captures leads and escalates automatically</li>
                 </ul>
                 <Link href="/contact" className="mt-auto">
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-full font-bold">Explore Chatbots</Button>
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-full font-bold">Explore Chatbotss</Button>
                 </Link>
               </CardContent>
             </Card>

@@ -71,7 +71,7 @@ export default function AICallAgentPage() {
         phoneCountry: "US" as const, // Changed default to US country code
         agentVoice: "female" as const,
         primaryColor: "#6366F1",
-        widgetTitle: "Call with AI Agent",
+        chatbotTitle: "Call with AI Agent",
         welcomeMessage: "Hi! How can I help you today?",
         isActive: true,
         businessContext: "",

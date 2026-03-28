@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { user, subscription, subscriptionUsage, widget } from '@/db/schema';
+import { user, subscription, subscriptionUsage, chatbot } from '@/db/schema';
 import { eq, and, count } from 'drizzle-orm';
 import { ensureUserExists } from '@/lib/user-utils';
 import { getCurrentBillingPeriod, getBillingPeriodKey } from '@/lib/billing';
@@ -45,9 +45,9 @@ export async function GET() {
             .limit(1);
 
         // Default plan limits
-        const defaultLimits: Record<string, { messages: number; chatbot: number }> = {
-            free: { messages: 20, chatbot: 1 },
-            pro: { messages: 1000, chatbot: 10 }
+        const defaultLimits: Record<string, { messages: number; chatbots: number }> = {
+            free: { messages: 20, chatbots: 1 },
+            pro: { messages: 1000, chatbots: 10 }
         };
 
         // Get user signup date for billing cycle calculation
@@ -84,7 +84,7 @@ export async function GET() {
                 userId,
                 period: currentPeriodKey,
                 messageCount: 0,
-                widgetCount: 0,
+                chatbotCount: 0,
             });
 
             usageRecord = [{
@@ -92,25 +92,25 @@ export async function GET() {
                 userId,
                 period: currentPeriodKey,
                 messageCount: 0,
-                widgetCount: 0,
+                chatbotCount: 0,
                 updatedAt: new Date()
             }];
         }
 
-        // Get actual widget count for the user
-        const widgetCountResult = await db
+        // Get actual chatbot count for the user
+        const chatbotCountResult = await db
             .select({ count: count() })
-            .from(widget)
-            .where(eq(widget.userId, userId));
+            .from(chatbot)
+            .where(eq(chatbot.userId, userId));
 
-        const actualWidgetCount = widgetCountResult[0]?.count || 0;
+        const actualChatbotCount = chatbotCountResult[0]?.count || 0;
 
-        // Update widget count in usage if it's different
-        if (actualWidgetCount !== usageRecord[0].widgetCount) {
+        // Update chatbot count in usage if it's different
+        if (actualChatbotCount !== usageRecord[0].chatbotCount) {
             await db
                 .update(subscriptionUsage)
                 .set({
-                    widgetCount: actualWidgetCount,
+                    chatbotCount: actualChatbotCount,
                     updatedAt: new Date()
                 })
                 .where(
@@ -120,7 +120,7 @@ export async function GET() {
                     )
                 );
 
-            usageRecord[0].widgetCount = actualWidgetCount;
+            usageRecord[0].chatbotCount = actualChatbotCount;
         }
 
         const planLimits = defaultLimits[currentPlan.plan] || defaultLimits.free;
@@ -137,7 +137,7 @@ export async function GET() {
             },
             usage: {
                 messageCount: usageRecord[0].messageCount,
-                widgetCount: usageRecord[0].widgetCount,
+                chatbotCount: usageRecord[0].chatbotCount,
                 period: currentPeriodKey,
                 limits: planLimits,
                 resetDate: billingPeriod.periodEnd,

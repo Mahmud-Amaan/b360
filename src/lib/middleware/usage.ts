@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { UsageService } from '@/lib/usage';
 
 export interface UsageCheckOptions {
-    action: 'message' | 'widget';
+    action: 'message' | 'chatbot';
     requireAuth?: boolean;
 }
 
@@ -42,7 +42,7 @@ export async function withUsageCheck(
                         error: 'Usage limit exceeded',
                         message: `You have reached your ${options.action} limit for this month.`,
                         limits: {
-                            [options.action]: options.action === 'message' ? limits.messages : limits.chatbot
+                            [options.action]: options.action === 'message' ? limits.messages : limits.chatbots
                         },
                         upgrade: userPlan === 'free' ? 'Upgrade to Pro for higher limits' : null
                     },
@@ -79,18 +79,18 @@ export function withUsageLimits(options: UsageCheckOptions) {
  */
 export async function trackUsage(
     userId: string,
-    action: 'message' | 'widget',
+    action: 'message' | 'chatbot',
     count: number = 1,
-    widgetId?: string
+    chatbotId?: string
 ): Promise<boolean> {
     try {
         if (action === 'message') {
-            if (!widgetId) {
-                throw new Error('widgetId is required for message tracking');
+            if (!chatbotId) {
+                throw new Error('chatbotId is required for message tracking');
             }
-            return await UsageService.incrementMessageUsage(userId, widgetId, count);
-        } else if (action === 'widget') {
-            return await UsageService.syncWidgetCount(userId);
+            return await UsageService.incrementMessageUsage(userId, chatbotId, count);
+        } else if (action === 'chatbot') {
+            return await UsageService.syncChatbotCount(userId);
         }
         return false;
     } catch (error) {

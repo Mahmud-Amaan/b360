@@ -20,7 +20,7 @@ export default function RcsMessagingPage() {
         "Suggested replies and actions",
         "Read receipts and typing indicators",
         "Secure and verified sender",
-        "Chatbot integration",
+        "Chatbots integration",
         "Campaign management",
         "Analytics and reporting",
         "High-resolution photo and video sharing",
@@ -182,7 +182,7 @@ export default function RcsMessagingPage() {
                 The Future of A2P Messaging
               </h2>
               <p className="text-xl opacity-90 leading-relaxed max-w-3xl mx-auto">
-                Leverage AI-powered chatbots and rich media to create
+                Leverage AI-powered chatbotss and rich media to create
                 conversational experiences that delight customers and drive
                 conversions.
               </p>

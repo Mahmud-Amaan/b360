@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/db";
-import { user, widget, subscriptionUsage } from "@/db/schema";
+import { user, chatbot, subscriptionUsage } from "@/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { getCurrentBillingPeriod } from "@/lib/billing";
 import { plans } from "@/lib/config/plans";
@@ -33,7 +33,7 @@ export async function GET() {
     const [usageRecord] = await db
       .select({
         messageCount: subscriptionUsage.messageCount,
-        widgetCount: subscriptionUsage.widgetCount,
+        chatbotCount: subscriptionUsage.chatbotCount,
       })
       .from(subscriptionUsage)
       .where(
@@ -43,11 +43,11 @@ export async function GET() {
         )
       );
 
-    // Get active chatbot count
-    const [activeChatbot] = await db
+    // Get active chatbots count
+    const [activeChatbots] = await db
       .select({ count: count() })
-      .from(widget)
-      .where(and(eq(widget.userId, userId), eq(widget.isActive, true)));
+      .from(chatbot)
+      .where(and(eq(chatbot.userId, userId), eq(chatbot.isActive, true)));
 
     // Get user's subscription to determine their plan
     const userSubscription = await getOrCreateUserSubscription(userId);
@@ -62,9 +62,9 @@ export async function GET() {
         used: usageRecord?.messageCount || 0,
         limit: planLimits.messages,
       },
-      chatbot: {
-        used: activeChatbot.count || 0,
-        limit: planLimits.chatbot,
+      chatbots: {
+        used: activeChatbots.count || 0,
+        limit: planLimits.chatbots,
       },
       plan,
     };

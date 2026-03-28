@@ -21,7 +21,7 @@ export default function Sidebar() {
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Call Agents", href: "/dashboard/call-agents", icon: Phone },
-    { name: "Chatbot", href: "/dashboard/chatbot", icon: MessageCircle },
+    { name: "Chatbots", href: "/dashboard/chatbots", icon: MessageCircle },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 

@@ -8,14 +8,14 @@ export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/twilio")) {
     return NextResponse.next();
   }
-  // Handle CORS for widget API routes
-  const isWidgetAPIRoute =
-    request.nextUrl.pathname.startsWith("/api/chatbot/") &&
+  // Handle CORS for chatbot API routes
+  const isChatbotAPIRoute =
+    request.nextUrl.pathname.startsWith("/api/chatbots/") &&
     (request.nextUrl.pathname.includes("/status") ||
       request.nextUrl.pathname.includes("/chat") ||
-      request.nextUrl.pathname.endsWith("/chatbot"));
+      request.nextUrl.pathname.endsWith("/chatbots"));
 
-  if (isWidgetAPIRoute) {
+  if (isChatbotAPIRoute) {
     // Handle preflight OPTIONS request
     if (request.method === "OPTIONS") {
       return new NextResponse(null, {
@@ -68,5 +68,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/chatbot/:path*"],
+  matcher: ["/dashboard/:path*", "/api/chatbots/:path*"],
 };

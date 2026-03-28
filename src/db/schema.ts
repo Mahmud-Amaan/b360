@@ -25,7 +25,7 @@ export const user = pgTable("user", {
 });
 
 export const userRelations = relations(user, ({ many }) => ({
-  chatbot: many(widget),
+  chatbots: many(chatbot),
   subscriptions: many(subscription),
   payments: many(payment),
   subscriptionUsage: many(subscriptionUsage),
@@ -75,7 +75,7 @@ export const verificationTokens = pgTable(
   })
 );
 
-export const widget = pgTable("widget", {
+export const chatbot = pgTable("chatbot", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
     .references(() => user.id)
@@ -85,7 +85,7 @@ export const widget = pgTable("widget", {
   primaryColor: text("primary_color").default("#6366F1").notNull(),
   productName: text("product_name").notNull(),
   description: text("description").notNull(),
-  widgetTitle: text("widget_title").default("Chat with us").notNull(),
+  chatbotTitle: text("chatbot_title").default("Chat with us").notNull(),
   welcomeMessage: text("welcome_message")
     .default("Hi! How can I help you today?")
     .notNull(),
@@ -98,29 +98,29 @@ export const widget = pgTable("widget", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const widgetRelations = relations(widget, ({ one }) => ({
-  user: one(user, { fields: [widget.userId], references: [user.id] }),
-  analytics: one(widgetAnalytics, {
-    fields: [widget.id],
-    references: [widgetAnalytics.widgetId],
+export const chatbotRelations = relations(chatbot, ({ one }) => ({
+  user: one(user, { fields: [chatbot.userId], references: [user.id] }),
+  analytics: one(chatbotAnalytics, {
+    fields: [chatbot.id],
+    references: [chatbotAnalytics.chatbotId],
   }),
 }));
 
-// Leads captured from widget chats (email collection)
-export const widgetLead = pgTable("widget_lead", {
+// Leads captured from chatbot chats (email collection)
+export const chatbotLead = pgTable("chatbot_lead", {
   id: uuid("id").defaultRandom().primaryKey(),
-  widgetId: uuid("widget_id")
-    .references(() => widget.id)
+  chatbotId: uuid("chatbot_id")
+    .references(() => chatbot.id)
     .notNull(),
   email: text("email").notNull(),
   message: text("message"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const widgetAnalytics = pgTable("widget_analytics", {
+export const chatbotAnalytics = pgTable("chatbot_analytics", {
   id: uuid("id").defaultRandom().primaryKey(),
-  widgetId: uuid("widget_id")
-    .references(() => widget.id)
+  chatbotId: uuid("chatbot_id")
+    .references(() => chatbot.id)
     .notNull()
     .unique(), // Added .unique()
   messageCount: integer("message_count").default(0).notNull(),
@@ -128,12 +128,12 @@ export const widgetAnalytics = pgTable("widget_analytics", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const widgetAnalyticsRelations = relations(
-  widgetAnalytics,
+export const chatbotAnalyticsRelations = relations(
+  chatbotAnalytics,
   ({ one }) => ({
-    widget: one(widget, {
-      fields: [widgetAnalytics.widgetId],
-      references: [widget.id],
+    chatbot: one(chatbot, {
+      fields: [chatbotAnalytics.chatbotId],
+      references: [chatbot.id],
     }),
   })
 );
@@ -195,7 +195,7 @@ export const subscriptionUsage = pgTable("subscription_usage", {
     .notNull(),
   period: text("period").notNull(), // Format: 'YYYY-MM'
   messageCount: integer("message_count").default(0).notNull(),
-  widgetCount: integer("widget_count").default(0).notNull(),
+  chatbotCount: integer("chatbot_count").default(0).notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

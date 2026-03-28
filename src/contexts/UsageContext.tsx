@@ -7,24 +7,24 @@ import { useUserSettings } from "@/store/useUserSettings";
 interface UsageContextType {
   // Usage data
   messageCount: number;
-  widgetCount: number;
+  chatbotCount: number;
   limits: {
     messages: number;
-    chatbot: number;
+    chatbots: number;
   };
 
   // Permissions
   canSendMessage: boolean;
-  canCreateWidget: boolean;
+  canCreateChatbot: boolean;
 
   // Remaining quotas
   remainingMessages: number;
-  remainingChatbot: number;
+  remainingChatbots: number;
 
   // Usage percentages
   usagePercentage: {
     messages: number;
-    chatbot: number;
+    chatbots: number;
   };
 
   // Plan info
@@ -33,7 +33,7 @@ interface UsageContextType {
 
   // Actions
   trackMessage: (count?: number) => Promise<void>;
-  trackWidget: () => Promise<void>;
+  trackChatbot: () => Promise<void>;
   refreshUsage: () => Promise<void>;
 
   // State
@@ -54,10 +54,10 @@ export function UsageProvider({ children }: UsageProviderProps) {
     usage,
     isLoading,
     error,
-    canCreateWidget,
+    canCreateChatbot,
     canSendMessage,
     remainingMessages,
-    remainingChatbot,
+    remainingChatbots,
     usagePercentage,
     refreshUsage: refreshUserSettings,
   } = useUserSettings();
@@ -94,8 +94,8 @@ export function UsageProvider({ children }: UsageProviderProps) {
     }
   };
 
-  // Track widget creation/update
-  const trackWidget = async () => {
+  // Track chatbot creation/update
+  const trackChatbot = async () => {
     if (!session?.user?.id || isTracking) return;
 
     setIsTracking(true);
@@ -106,18 +106,18 @@ export function UsageProvider({ children }: UsageProviderProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          type: "chatbot",
-          increment: 0, // This will trigger a sync with actual widget count
+          type: "chatbots",
+          increment: 0, // This will trigger a sync with actual chatbot count
         }),
       });
 
       if (response.ok) {
         await refreshUserSettings();
       } else {
-        console.error("Failed to sync widget usage");
+        console.error("Failed to sync chatbot usage");
       }
     } catch (error) {
-      console.error("Error syncing widget usage:", error);
+      console.error("Error syncing chatbot usage:", error);
     } finally {
       setIsTracking(false);
     }
@@ -126,16 +126,16 @@ export function UsageProvider({ children }: UsageProviderProps) {
   const contextValue: UsageContextType = {
     // Usage data
     messageCount: usage?.messageCount || 0,
-    widgetCount: usage?.widgetCount || 0,
-    limits: usage?.limits || { messages: 20, chatbot: 1 },
+    chatbotCount: usage?.chatbotCount || 0,
+    limits: usage?.limits || { messages: 20, chatbots: 1 },
 
     // Permissions
     canSendMessage,
-    canCreateWidget,
+    canCreateChatbot,
 
     // Remaining quotas
     remainingMessages,
-    remainingChatbot,
+    remainingChatbots,
 
     // Usage percentages
     usagePercentage,
@@ -146,7 +146,7 @@ export function UsageProvider({ children }: UsageProviderProps) {
 
     // Actions
     trackMessage,
-    trackWidget,
+    trackChatbot,
     refreshUsage: refreshUserSettings,
 
     // State
@@ -172,13 +172,13 @@ export function useUsage() {
 // Higher-order component for components that need usage checking
 export function withUsageCheck<P extends object>(
   WrappedComponent: React.ComponentType<P>,
-  requiredAction: "message" | "widget"
+  requiredAction: "message" | "chatbot"
 ) {
   return function UsageCheckedComponent(props: P) {
-    const { canSendMessage, canCreateWidget, plan, isLoading } = useUsage();
+    const { canSendMessage, canCreateChatbot, plan, isLoading } = useUsage();
 
     const canPerform =
-      requiredAction === "message" ? canSendMessage : canCreateWidget;
+      requiredAction === "message" ? canSendMessage : canCreateChatbot;
 
     if (isLoading) {
       return <div>Loading usage information...</div>;
@@ -190,7 +190,7 @@ export function withUsageCheck<P extends object>(
           <h3 className="font-medium text-yellow-800 mb-2">
             {requiredAction === "message"
               ? "Message Limit Reached"
-              : "Widget Limit Reached"}
+              : "Chatbot Limit Reached"}
           </h3>
           <p className="text-sm text-yellow-700 mb-3">
             You&apos;ve reached your monthly {requiredAction} limit.
