@@ -15,8 +15,8 @@ export default function ContactPage() {
       icon: <Mail className="w-12 h-12" />,
       title: "Email Us",
       description: "Get detailed responses to your inquiries",
-      action: "inzesh14@gmail.com",
-      href: "mailto:inzesh14@gmail.com",
+      action: "bridgely360official@gmail.com",
+      href: "mailto:bridgely360official@gmail.com",
       gradient: "from-blue-500 to-blue-600",
     },
     {

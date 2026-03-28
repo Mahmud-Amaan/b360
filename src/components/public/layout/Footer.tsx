@@ -98,8 +98,8 @@ export function Footer() {
                 </a>
               </p>
               <p className="mb-4">
-                <a href="mailto:inzesh14@gmail.com" className="hover:text-white transition-colors">
-                  inzesh14@gmail.com
+                <a href="mailto:bridgely360official@gmail.com" className="hover:text-white transition-colors">
+                  bridgely360official@gmail.com
                 </a>
               </p>
               <p>
